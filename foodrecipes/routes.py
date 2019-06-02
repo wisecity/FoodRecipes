@@ -1,7 +1,7 @@
 from flask import render_template, url_for, flash, redirect, request
-from recipeweb import db, app, bcrypt
-from recipeweb.forms import RegistrationForm, LoginForm, UpdateAccountForm, CommentForm
-from recipeweb.models import User, Post, MainPageComments
+from foodrecipes import db, app, bcrypt
+from foodrecipes.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
+from foodrecipes.models import User, Recipe, Ingredients
 from flask_login import login_user, current_user, logout_user, login_required
 
 posts = [
@@ -78,22 +78,22 @@ def account():
 @app.route("/my_feed")
 @login_required
 def my_feed():
-	posts = Post.query.filter_by(user_id=current_user.id)
+	posts = Recipe.query.filter_by(user_id=current_user.id)
 	return render_template('my_feed.html', title='My Feed', posts=posts)
 
 
 @app.route("/feed")
 @login_required
 def feed():
-	posts = Post.query.filter_by()
+	posts = Recipe.query.filter_by()
 	return render_template('feed.html', title='Feed', posts=posts)
 
 
 @app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
 @app.route('/<path:path>', methods=['GET', 'POST'])
 def catch_all(path):
-	comments = db.session.query(MainPageComments).order_by(MainPageComments.date_posted)
-	form = CommentForm()
+	comments = db.session.query(ANYMODEL).order_by(ANYMODEL.date_posted)
+	form = PostForm()
 	if form.validate_on_submit():
 		if form.author.data == "":
 			form.author.data = "Anonim"

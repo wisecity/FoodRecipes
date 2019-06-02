@@ -1,4 +1,4 @@
-from holyconfessions import app
+from foodrecipes import app
 
 
 if __name__ == '__main__':

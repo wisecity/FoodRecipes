@@ -1,5 +1,5 @@
 from datetime import datetime
-from recipeweb import db, login_manager
+from foodrecipes import db, login_manager
 from flask_login import UserMixin
 
 @login_manager.user_loader
@@ -33,10 +33,11 @@ class Ingredients(db.Model):
 	price = db.Column(db.Integer)
 
 
+'''
 class RecipeIngredientsAssoc(db.Model):
 	__tablename__ = 'recipe_ingredients_assoc'
 	id = db.Column(db.Integer, primary_key=True)
 	quantity = db.Column(db.Integer)
 	recipe_id = db.Column(db.Integer, nullable=False, db.ForeignKey('recipe.id'))
 	ingredients_id = db.Column(db.Integer, nullable=False, db.ForeignKey('ingredients.id'))
-
+'''
