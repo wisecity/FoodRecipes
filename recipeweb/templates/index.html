@@ -1,0 +1,153 @@
+{% extends "indexlayout.html" %}
+{% block content %}
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<p class="samuel">
+
+<i style="color:red"> He who makes a beast of himself gets rid of the pain of being a man. </i> - Samuel L. Jackson
+</p>
+
+<p>
+	<a class="mainlink" href="yazar-hakkinda" style="color:red">Yazar ve Blog Hakkında</a>
+</p>
+<p>
+	<a class="mainlink" href="misafir-yazarlar-hakkinda" style="color:red">Misafir Yazarlar Hakkında</a>
+</p>
+
+<p>
+	<a class="mainlink" href="iletisim" style="color:red">İletişim Bilgileri</a>
+</p>
+
+<div class="column">
+	<div class="row">
+		<p>
+			Karanlık veya Kişisel Yazılar
+			<br>
+			<p>
+				<a class="mainlink" href="cabinfever">Cabin Fever</a>
+			</p>
+			<p>
+				<a class="mainlink" href="melancholia">Melankoli</a>
+			</p>
+			<p>
+				<a class="mainlink" href="anlasilmak-hakkinda">Anlasilmak</a>
+			</p>
+			<p>
+				<a class="mainlink" href="yetmiyor">Yetmiyor - 19.05.2019 09:42</a>
+			</p>
+			<p>
+				<a class="mainlink" href="buraya-bakarlar" style="color:red">Buraya bakarlar - 20.05.2019 00:33</a>
+			</p>	
+		</p>
+	</div>
+
+	<div class="row">
+		<p>
+			Bir Şeyler Hakkında
+			<br>
+			<p>
+				<a class="mainlink" href="inanc-hakkinda">İnanç Hakkında - 19.05.2019 09:59</a>
+			</p>
+			<p>
+				<a class="mainlink" href="inanc-hakkinda">Karşılık Beklemek ve Din - 19.05.2019 12:00</a>
+			</p>		
+			<p>
+				<a class="mainlink" href="karanlik-temasi">Karanlık Tema</a>
+			</p>
+			<p>
+				<a class="mainlink" href="yazmak-hakkinda">Yazmak Hakkında</a>
+			</p>
+			<p>
+				<a class="mainlink" href="nedensizlik-hakkinda">Nedensizlik Hakkında</a>
+			</p>
+		</p>
+	</div>
+</div>
+
+
+<div class="column">
+	<div class="row">
+		<p>
+			Modern Toplum Eleştrileri
+			<br>
+			<p>
+				<a class="mainlink" href="kole">Kölelik</a>
+			</p>
+			<p>
+				<a class="mainlink" href="hangisi-bilgelik">Hangisi Bilgelik? - 17.05.2019 22:36</a>
+			</p>
+			<p>
+				<a class="mainlink" href="dilencilik-de-meslektir">Dilencilik de Meslektir - 17.05.2019 23:00</a>
+			</p>	
+			<p>
+				<a class="mainlink" href="ruh-beden-ayrilmasi">Ruh-Beden Ayrılması - 17.05.2019 23:27</a>
+			</p>	
+			<p>
+				<a class="mainlink" href="tembellikhakki">Tembellik Hakkı</a> 
+			</p>
+			<p>
+				<a class="mainlink" href="anti-teknoloji">Anti-teknoloji</a>
+			</p>
+			<p>
+				<a class="mainlink" href="agaran-nesneler-kararan-hayatlar">Ağaran Nesneler, Kararan Hayatlar</a>
+			</p>
+			<p>
+				<a class="mainlink" href="gri">Gri</a>
+			</p>
+		</p>
+	</div>
+
+	<div class="row">
+		<p>
+			**Yakında Yayınlanacak Olan Yazılar**
+		</p>
+
+		<p>
+			<a class="mainlink" href="boeing-737-max">Boeing 737 Max</a> 
+		</p>
+		<p>
+			<a class="mainlink" href="bilimkurgu">Bilim Kurgular ve Sevimsiz Dünyalar</a>
+		</p>
+
+		<p>
+			<a class="mainlink" href="kotuluk-hakkinda">Kötülük Hakkında</a>
+		</p>
+		<p>
+			<a class="mainlink" href="benlik-hakkinda">Benlik Hakkında</a>
+		</p>
+	</div>
+</div>
+<div class="column">
+	<div class="row">
+		<form method="POST" action="">
+			{{ form.hidden_tag() }}
+			<div class="form-group">
+	            {{ form.content.label(class="form-control-label") }}
+	            {{ form.content(class="form-control form-control-lg") }}
+	        </div>
+	        <div class="form-group">
+	            {{ form.author.label(class="form-control-label") }}
+	            {{ form.author(class="form-control form-control-lg") }}
+	        </div>
+	        <div class="form-group">
+	                {{ form.submit(class="btn btn-outline-info") }}
+	        </div>
+	    </form>
+    </div>
+    <div class="row">
+    	<div> 
+	    	{% for comment in comments %}
+	    	{{ comment.content }} -
+	    	{{ comment.author }}
+	    	<br>
+	    	{% endfor %}
+    	<div>
+    	</ul>
+    </div>
+</div>
+{% endblock content %}
