@@ -22,12 +22,12 @@ posts = [
 @app.route("/register", methods=['GET', 'POST'])
 def register():
 	if current_user.is_authenticated:
-		return redirect(url_for('home'))
+		return redirect(url_for('account'))
 
 	form = RegistrationForm()
 	if form.validate_on_submit():
 		hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-		user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+		user = User(username=form.username.data, password=hashed_password)
 		print(user)
 		db.session.add(user)
 		db.session.commit()
@@ -39,15 +39,15 @@ def register():
 @app.route("/login", methods=['GET', 'POST'])
 def login():
 	if current_user.is_authenticated:
-		return redirect(url_for('home'))
+		return redirect(url_for('account'))
 
 	form = LoginForm()
 	if form.validate_on_submit():
-		user = User.query.filter_by(email=form.email.data).first()
+		user = User.query.filter_by(username=form.username.data).first()
 		if user and bcrypt.check_password_hash(user.password, form.password.data):
 			login_user(user, remember=form.remember.data)
 			next_page = request.args.get('next')
-			return redirect(next_page) if next_page else redirect(url_for('home'))
+			return redirect(next_page) if next_page else redirect(url_for('account'))
 		else:
 			flash('Giris basarisiz.', 'danger')
 	return render_template('login.html', title='Giris Yap', form=form)
@@ -56,7 +56,7 @@ def login():
 @app.route("/logout")
 def logout():
 	logout_user()
-	return redirect(url_for('home'))
+	return redirect(url_for('account'))
 
 
 @app.route("/account", methods=['GET', 'POST'])
@@ -64,14 +64,15 @@ def logout():
 def account():
 	form = UpdateAccountForm()
 	if form.validate_on_submit():
-		current_user.username = form.username.data
-		current_user.email = form.email.data
+		print("aaaaa")
+		#current_user.username = form.username.data
+		user = User.query.filter_by(username=current_user.username).first()
+		user.username = form.username.data 
 		db.session.commit()
 		flash('Hesap guncellendi.', 'success')
 		return redirect(url_for('account'))
 	elif request.method == 'GET':
 		form.username.data = current_user.username
-		form.email.data = current_user.email
 	return render_template('account.html', title='Account', form=form)
 
 
@@ -89,10 +90,10 @@ def feed():
 	return render_template('feed.html', title='Feed', posts=posts)
 
 
-@app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
+# @app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
 @app.route('/<path:path>', methods=['GET', 'POST'])
 def catch_all(path):
-	comments = db.session.query(ANYMODEL).order_by(ANYMODEL.date_posted)
+	# comments = db.session.query(ANYMODEL).order_by(ANYMODEL.date_posted)
 	form = PostForm()
 	if form.validate_on_submit():
 		if form.author.data == "":
@@ -103,7 +104,7 @@ def catch_all(path):
 		flash('Yorum eklendi.', 'success')
 		return redirect(url_for('catch_all', path=path))
 
-	return render_template('{}.html'.format(path), form=form, comments=comments)
-
+	# return render_template('{}.html'.format(path), form=form, comments=comments)
+	return render_template('{}.html'.format(path), form=form)
 
 

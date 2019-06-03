@@ -18,11 +18,12 @@ class RegistrationForm(FlaskForm):
 		if user:
 			raise ValidationError('Kullanici adi daha once alinmis.')
 
+	'''
 	def validate_email(self, email):
 		email = User.query.filter_by(email=email.data).first()
 		if email:
 			raise ValidationError('Email daha once alinmis.')
-
+	'''
 
 class LoginForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
