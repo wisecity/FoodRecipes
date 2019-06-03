@@ -1,25 +1,20 @@
-To run: inside FoodRecipes directory, python run.py
-To stop: ctrl + c on linux
-When debugger mode is active, you don't need to stop the application.
+#FOOD RECIPE
+Download on Windows:
 
+>pip install Flask
 
-db: sqlAlchemy
-At fresh start, do the db.drop_all() thing.
+Also all the requrements.txt tools.
 
-Debugging
-inside the FoodRecipes directory:
+To run:
 
-> python
-> from foodrecipes import db
-> from foodrecipes.models import User
+>Inside FoodRecipes directory, python run.py
 
-> db.drop_all()		# to drop all relations
-> db.create_all()	
+Refresh Database by:
 
-> user = User(username='Doruk', password='dodo1234')
-> db.session.add(user)
-> db.session.commit()
+>python manage.py db init
 
-> db.session.query(User).first().password
+Migrate database by:
+
+>python manage.py db migrate
 
 

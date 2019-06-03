@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request
 from flask_login import login_user, current_user, logout_user, login_required
 from foodrecipes import db, app, bcrypt
 from foodrecipes.forms import RegistrationForm, LoginForm, UpdateAccountForm, RecipeForm
-from foodrecipes.models import User, Recipe, Ingredients
+from foodrecipes.models import User, Recipe
 
 
 posts = [
