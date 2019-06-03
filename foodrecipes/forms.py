@@ -18,12 +18,6 @@ class RegistrationForm(FlaskForm):
 		if user:
 			raise ValidationError('Kullanici adi daha once alinmis.')
 
-	'''
-	def validate_email(self, email):
-		email = User.query.filter_by(email=email.data).first()
-		if email:
-			raise ValidationError('Email daha once alinmis.')
-	'''
 
 class LoginForm(FlaskForm):
 	username = StringField('Username', validators=[DataRequired()])
@@ -39,13 +33,17 @@ class UpdateAccountForm(FlaskForm):
 	submit = SubmitField('Update')
 
 	def validate_username(self, username):
+		print("{} - {}".format(username.data, current_user.username))
 		if username.data != current_user.username:
 			user = User.query.filter_by(username=username.data).first()
 			if user:
 				raise ValidationError('Kullanici adi daha once alinmis.')
 
 
-class PostForm(FlaskForm):
-	content = StringField('Yorum', validators=[DataRequired()])
+
+
+class RecipeForm(FlaskForm):
+	name = StringField('Name', validators=[DataRequired()])
+	content = StringField('Content', validators=[DataRequired()])
 	submit = SubmitField('Yorum ekle')
 

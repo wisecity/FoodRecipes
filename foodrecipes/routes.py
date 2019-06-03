@@ -1,8 +1,9 @@
 from flask import render_template, url_for, flash, redirect, request
-from foodrecipes import db, app, bcrypt
-from foodrecipes.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
-from foodrecipes.models import User, Recipe, Ingredients
 from flask_login import login_user, current_user, logout_user, login_required
+from foodrecipes import db, app, bcrypt
+from foodrecipes.forms import RegistrationForm, LoginForm, UpdateAccountForm, RecipeForm
+from foodrecipes.models import User, Recipe, Ingredients
+
 
 posts = [
 	{
@@ -11,7 +12,7 @@ posts = [
 		'date': '22.04.1998'
 	},
 	{
-		'author': 'Doruk',
+		'author': 'Ahmet Utku',
 		'title': 'Motorsiklet',
 		'date': '20.05.2019'
 	}
@@ -64,7 +65,6 @@ def logout():
 def account():
 	form = UpdateAccountForm()
 	if form.validate_on_submit():
-		print("aaaaa")
 		#current_user.username = form.username.data
 		user = User.query.filter_by(username=current_user.username).first()
 		user.username = form.username.data 
@@ -74,6 +74,15 @@ def account():
 	elif request.method == 'GET':
 		form.username.data = current_user.username
 	return render_template('account.html', title='Account', form=form)
+
+
+@app.route("/autofill_password")
+@login_required
+def autofill_password():
+	search = request.args.get('q')
+	print(search)
+	password = User.query.filter_by(username=current_user.username).first().password
+	return jsonify(password=password)
 
 
 @app.route("/my_feed")
@@ -90,11 +99,14 @@ def feed():
 	return render_template('feed.html', title='Feed', posts=posts)
 
 
+
+# This method catches every url
 # @app.route('/', defaults={'path': ''}, methods=['GET', 'POST'])
 @app.route('/<path:path>', methods=['GET', 'POST'])
 def catch_all(path):
+	'''
 	# comments = db.session.query(ANYMODEL).order_by(ANYMODEL.date_posted)
-	form = PostForm()
+	form = RecipeForm()
 	if form.validate_on_submit():
 		if form.author.data == "":
 			form.author.data = "Anonim"
@@ -103,8 +115,8 @@ def catch_all(path):
 		db.session.commit()
 		flash('Yorum eklendi.', 'success')
 		return redirect(url_for('catch_all', path=path))
-
+	'''
 	# return render_template('{}.html'.format(path), form=form, comments=comments)
-	return render_template('{}.html'.format(path), form=form)
+	return render_template('{}.html'.format(path))
 
 
