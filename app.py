@@ -7,14 +7,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///base.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
-from base import FoodRecipes, db
+from base import Recipe, db
 db.init_app(app)
 app.app_context().push()
 db.create_all()
 
 class All_Recipes(Resource):
     def get(self):
-        return {'Recipes': list(map(lambda x: x.json(), FoodRecipes.query.all()))}
+        return {'Recipes': list(map(lambda x: x.json(), Recipe.query.all()))}
 
 api.add_resource(All_Recipes, '/')
 
