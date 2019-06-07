@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Flask
 from flask_restful import Resource, reqparse, Api
 
@@ -7,7 +8,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///base.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PROPAGATE_EXCEPTIONS'] = True
 
-from base import Recipe, db
+from base import Recipe, User, db
 db.init_app(app)
 app.app_context().push()
 db.create_all()

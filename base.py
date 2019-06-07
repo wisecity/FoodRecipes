@@ -26,24 +26,25 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def delete_by_Id(self):
-        cls.query.filter_by(Id=self.Id).delete()
+    def delete_by_Id(cls, Id):
+        cls.query.filter_by(Id=Id).delete()
+        db.session.commit()
+
+    def delete_by_Username(cls, Username):
+        cls.query.filter_by(Username=Username).delete()
         db.session.commit()
 
     def update_(cls, self):
-        _user = cls.query.filter_by(Id=self.Id).first()
-        cls.query.filter_by(Id=self.Id).delete()
-        db.session.commit()
+        _user = cls.query.filter_by(Id=self.Id).first()        
         _user.Username = self.Username
-        _user.Password = self.Password
-        db.session.add(_user)
+        _user.Password = self.Password        
         db.session.commit()
 
 class Recipe(db.Model):
     __tablename__ = 'RECIPE'
     Id = db.Column(db.Integer, primary_key=True) 
     Name = db.Column(db.String(100), unique=True, nullable=False)
-    PostTime = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    PostTime = db.Column(db.DateTime, default=datetime.utcnow)
     Contents = db.Column(db.Text)
     Views = db.Column(db.Integer)
     Score = db.Column(db.Float)
@@ -75,9 +76,12 @@ class Recipe(db.Model):
         cls.query.filter_by(Id=Id).delete()
         db.session.commit()
 
+    def delete_by_Name(cls, Name):
+        cls.query.filter_by(Name=Name).delete()
+        db.session.commit()
+
     def update_(cls, self):
         _recipe = cls.query.filter_by(Id=self.Id).first()
-        cls.query.filter_by(Id=self.Id).delete()
         db.session.commit()
         _recipe.Name = self.Name
         _recipe.PostTime = self.PostTime
@@ -85,5 +89,4 @@ class Recipe(db.Model):
         _recipe.Views = self.Views
         _recipe.Score = self.Score
         _recipe.Uid = self.Uid
-        db.session.add(_recipe)
         db.session.commit()
