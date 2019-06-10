@@ -136,6 +136,9 @@ class Recipe(db.Model):
         def __init__(self, Rid, Photo_Location):
             self.Rid = Rid
             self.Photo_Location = Photo_Location
+        
+        def json(self):
+            return {'Id': self.Id, 'Rid' : self.Rid, 'Photo_Location': self.Photo_Location}
 
         @classmethod
         def add_photo(self, Name, Username):
@@ -150,6 +153,13 @@ class Recipe(db.Model):
             _recipe = Recipe.query.filter_by(Uid = _user.Id, Name=Name)
             Ingredient_Photos.query.filter_by(Rid = _recipe.Id, Id = self.Id).delete()
             db.session.commit()
+
+        def get_photos(self, Name, Username):
+            _user = User.query.filter_by(Username=Username).first()
+            _recipe = Recipe.query.filter_by(Uid = _user.Id, Name=Name)
+            photoList = Ingredient_Photos.query.filter_by(Rid = _recipe.Id).all()
+            return photoList
+
     class Step_Photos(db.Model):
         __tablename__ = 'STEP_PHOTOS'
         Id = db.Column(db.Integer, primary_key=True)
@@ -159,6 +169,9 @@ class Recipe(db.Model):
         def __init__(self, Rid, Photo_Location):
             self.Rid = Rid
             self.Photo_Location = Photo_Location
+
+        def json(self):
+            return {'Id': self.Id, 'Rid' : self.Rid, 'Photo_Location': self.Photo_Location}
 
         @classmethod
         def add_photo(self, Name, Username):
@@ -173,6 +186,12 @@ class Recipe(db.Model):
             _recipe = Recipe.query.filter_by(Uid = _user.Id, Name=Name)
             Step_Photos.query.filter_by(Rid = _recipe.Id, Id = self.Id).delete()
             db.session.commit()
+        
+        def get_photos(self, Name, Username):
+            _user = User.query.filter_by(Username=Username).first()
+            _recipe = Recipe.query.filter_by(Uid = _user.Id, Name=Name)
+            photoList = Step_Photos.query.filter_by(Rid = _recipe.Id).all()
+            return photoList
 
     class Final_Photos(db.Model):
         __tablename__ = 'FINAL_PHOTOS'
@@ -183,6 +202,9 @@ class Recipe(db.Model):
         def __init__(self, Rid, Photo_Location):
             self.Rid = Rid
             self.Photo_Location = Photo_Location
+
+        def json(self):
+            return {'Id': self.Id, 'Rid' : self.Rid, 'Photo_Location': self.Photo_Location}
 
         @classmethod
         def add_photo(self, Name, Username):
@@ -197,3 +219,9 @@ class Recipe(db.Model):
             _recipe = Recipe.query.filter_by(Uid = _user.Id, Name=Name)
             Final_Photos.query.filter_by(Rid = _recipe.Id, Id = self.Id).delete()
             db.session.commit()
+
+        def get_photos(self, Name, Username):
+            _user = User.query.filter_by(Username=Username).first()
+            _recipe = Recipe.query.filter_by(Uid = _user.Id, Name=Name)
+            photoList = Final_Photos.query.filter_by(Rid = _recipe.Id).all()
+            return photoList
