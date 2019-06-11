@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% block content %}
+	{% for recipe in recipes %}
+		<h1>Name: {{recipe.Name}}</h1>
+		<p>Contents: {{recipe.Contents}}</p>
+		<p>Details: {{recipe.Details}}</p>
+		<p>PostTime: {{recipe.PostTime}}</p>
+		<p>Score: {{recipe.Score}}</p>
+		<p>Uid: {{recipe.Uid}}</p>
+		<p>Views: {{recipe.Views}}</p>
+		<hr>
+	{% endfor %}
+{% endblock %}

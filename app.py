@@ -13,6 +13,7 @@ app.secret_key = "lSc-eEq-Qvd"
 jwt = JWTManager(app)
 
 from base import Recipe, User, db
+from routes import *
 db.init_app(app)
 app.app_context().push()
 db.create_all()
