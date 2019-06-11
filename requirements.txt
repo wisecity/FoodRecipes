@@ -1,5 +1,6 @@
 Flask
 Flask-RESTful
+Flask-Wtf
 Flask-SQLAlchemy
 uwsgi
 flask_jwt_extended
