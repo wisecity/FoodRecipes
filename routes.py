@@ -27,7 +27,7 @@ mocked_recipes = [
         }        
     ]
 
-
+             
 @app.route("/addrecipe", methods=['GET', 'POST'])
 def addrecipe():
 	form = AddRecipeForm()
@@ -35,29 +35,30 @@ def addrecipe():
 		# Hacked it, waiting for api.
 		recipe = Recipe(name=form.name.data, contents=form.contents.data, 
 			details=form.details.data)
-		recipe.add_recipe(username="User_1")
+		recipe.add_recipe(username=current_user.username)
 		flash('Recipe Added.', 'success')
 		return redirect(url_for('mainpage'))
 	else:	
-		return render_template('addrecipe.html', form=form)
+		return render_template('addrecipe.html', form=form, title="Add Recipe")
 
 
-@app.route("/showrecipes")
-def showrecipes():
+@app.route("/allrecipes")
+def allrecipes():
 	recipes = Recipe.query.all()
-	return render_template('showrecipes.html', recipes=recipes)
+	return render_template('allrecipes.html', recipes=recipes, title="All Recipes")
 	# return render_template('showrecipes.html', recipes=mocked_recipes)
 
 
-@app.route("/mainpage")
-def mainpage():
-	return render_template('mainpage.html')
+@app.route("/myrecipes")
+def myrecipes():
+    my_recipes = Recipe.query.filter_by(user_id=current_user.id)
+    return render_template('myrecipes.html', recipes=my_recipes, title="My Recipes")
 
 
 @app.route("/signup", methods=['GET', 'POST'])
 def signup():
     if current_user.is_authenticated:
-        return redirect(url_for('account'))
+        return redirect(url_for('myrecipes'))
     else:
         form = UserRegistrationForm()
         if form.validate_on_submit():
@@ -73,10 +74,10 @@ def signup():
 
 
 # Don't change it's name. to trigger @login_required decorator, it needs to be named as login. 
-@app.route("/login", methods=['GET', 'POST'])
+@app.route("/", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('account'))
+        return redirect(url_for('myrecipes'))
     else:
         form = UserLoginForm()
         if form.validate_on_submit():
@@ -85,9 +86,10 @@ def login():
             if user: 
                 login_user(user, remember=form.remember.data)
                 next_page = request.args.get('next')
-                return redirect(next_page) if next_page else redirect(url_for('account'))
+                return redirect(next_page) if next_page else redirect(url_for('myrecipes'))
             else:
-                flash('Giris basarisiz.', 'danger')
+                flash('Failed.', 'danger')
+                return render_template('signin.html', title='Sign in', form=form)
         else:
             return render_template('signin.html', title='Sign in', form=form)
 
@@ -95,10 +97,4 @@ def login():
 @app.route("/signout")
 def signout():
     logout_user()
-    return redirect(url_for('mainpage'))
-
-
-@app.route("/account")
-@login_required
-def account():
-    return render_template("account.html")
+    return redirect(url_for('login'))

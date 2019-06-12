@@ -157,7 +157,7 @@ def fresh_token_loader_callback():
     )
 
 
-api.add_resource(All_Recipes, '/')
+api.add_resource(All_Recipes, '/aaa')
 api.add_resource(RecipeFormation, '/recipe')
 api.add_resource(RecipeManipulation, '/recipe/<string:recipeName>')
 api.add_resource(UserRecipes, '/user/<string:username>')
