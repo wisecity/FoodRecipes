@@ -1,22 +1,15 @@
+from run import app, db
 from datetime import datetime
-from flask import Flask, jsonify
+from flask import jsonify
 from flask_restful import Resource, reqparse, Api
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_refresh_token_required, get_jwt_identity, fresh_jwt_required, JWTManager
 
-
-app = Flask(__name__)
 api = Api(app)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///base.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['PROPAGATE_EXCEPTIONS'] = True
-app.secret_key = "lSc-eEq-Qvd"
 jwt = JWTManager(app)
 
-from base import Recipe, User, db
+from models import Recipe, User
 from routes import *
-db.init_app(app)
-app.app_context().push()
-db.create_all()
+
 
 class All_Recipes(Resource):
     def get(self):
@@ -24,10 +17,10 @@ class All_Recipes(Resource):
 
 class RecipeFormation(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('Name', type=str, required=True, help='Name of the recipe')
-    parser.add_argument('PostTime', type=lambda x: datetime.strptime(x,'%Y-%m-%dT%H:%M:%S'), required=True, help='Date of the recipe needs to be checked')
-    parser.add_argument('Contents', type=str, required=True, help='Content of the recipe')
-    parser.add_argument('Details', type=str, required=True, help='Details of the recipe')
+    parser.add_argument('name', type=str, required=True, help='Name of the recipe')
+    parser.add_argument('post_time', type=lambda x: datetime.strptime(x,'%Y-%m-%dT%H:%M:%S'), required=True, help='Date of the recipe needs to be checked')
+    parser.add_argument('contents', type=str, required=True, help='Content of the recipe')
+    parser.add_argument('details', type=str, required=True, help='Details of the recipe')
 
     @fresh_jwt_required
     def post(self):
@@ -38,15 +31,15 @@ class RecipeFormation(Resource):
             return
         args = RecipeFormation.parser.parse_args()
         if Recipe.find_by_name(Recipe, args['Name']):
-            return {' Message': 'Recipe with the name {} already exists'.format(args['Name'])}
-        item = Recipe(args['Name'], args['PostTime'], args['Contents'], args['Details'], 0, 0, id)
+            return {' Message': 'Recipe with the name {} already exists'.format(args['name'])}
+        item = Recipe(args['name'], args['post_ime'], args['contents'], args['details'], 0, 0, id)
         item.create_to()
         return item.json()
 
 class RecipeManipulation(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('Name', type=str, required=True, help='Name of the recipe')
-    parser.add_argument('Contents', type=str, required=True, help='Content of the recipe')
+    parser.add_argument('name', type=str, required=True, help='Name of the recipe')
+    parser.add_argument('contents', type=str, required=True, help='Content of the recipe')
 
     def get(self, recipeName):
         item = Recipe.find_by_name(Recipe, recipeName)
@@ -59,7 +52,7 @@ class RecipeManipulation(Resource):
     def delete(self, recipeName):
         username = get_jwt_identity()
         user = User.find_by_username(User, username)
-        id = user.Id
+        id = user.id
         item = Recipe.find_by_name(Recipe, recipeName)
         if item:
             if item.Uid != id:
@@ -79,17 +72,17 @@ class UserList(Resource):
 
 class UserRegister(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('Username', type=str, required=True, help='Name of the user')
-    parser.add_argument('Password', type=str, required=True, help='Password of the user')
+    parser.add_argument('username', type=str, required=True, help='Name of the user')
+    parser.add_argument('password', type=str, required=True, help='Password of the user')
 
     def post(self):
         args = UserRegister.parser.parse_args()
-        if User.find_by_username(User, args["Username"]):
+        if User.find_by_username(User, args["username"]):
             return {
                        "message": "User exists!"
                    }, 400
 
-        user = User(args["Username"], args["Password"])
+        user = User(args["Username"], args["password"])
         user.create_to()
         return {
             "message": "User {} created!".format(args["Username"])
@@ -97,17 +90,17 @@ class UserRegister(Resource):
 
 class UserLogin(Resource):
     parser = reqparse.RequestParser()
-    parser.add_argument('Username', type=str, required=True, help='Name of the user')
-    parser.add_argument('Password', type=str, required=True, help='Password of the user')
+    parser.add_argument('username', type=str, required=True, help='Name of the user')
+    parser.add_argument('password', type=str, required=True, help='Password of the user')
 
     def post(self):
         args = UserRegister.parser.parse_args()
 
-        user =  User.find_by_username(User, args["Username"])
+        user =  User.find_by_username(User, args["username"])
 
-        if user and user.Password == args["Password"]:
-            access_token = create_access_token(identity=user.Username, fresh=True)
-            refresh_token = create_refresh_token(identity=user.Username)
+        if user and user.Password == args["password"]:
+            access_token = create_access_token(identity=user.username, fresh=True)
+            refresh_token = create_refresh_token(identity=user.username)
 
             return {
                        "access_token": access_token,
@@ -170,8 +163,5 @@ api.add_resource(RecipeManipulation, '/recipe/<string:recipeName>')
 api.add_resource(UserRecipes, '/user/<string:username>')
 api.add_resource(UserList, "/user/<int:userId>")
 api.add_resource(UserRegister, "/user")
-api.add_resource(UserLogin, "/login")
+api.add_resource(UserLogin, "/loginnn")
 
-if __name__=='__main__':
-
-    app.run(debug=True)

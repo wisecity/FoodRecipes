@@ -1,13 +1,13 @@
 {% extends "layout.html" %}
 {% block content %}
 	{% for recipe in recipes %}
-		<h1>Name: {{recipe.Name}}</h1>
-		<p>Contents: {{recipe.Contents}}</p>
-		<p>Details: {{recipe.Details}}</p>
-		<p>PostTime: {{recipe.PostTime}}</p>
-		<p>Score: {{recipe.Score}}</p>
-		<p>Uid: {{recipe.Uid}}</p>
-		<p>Views: {{recipe.Views}}</p>
+		<h1>Name: {{recipe.name}}</h1>
+		<p>Contents: {{recipe.contents}}</p>
+		<p>Details: {{recipe.details}}</p>
+		<p>PostTime: {{recipe.post_ime}}</p>
+		<p>Score: {{recipe.score}}</p>
+		<p>Uid: {{recipe.user_id}}</p>
+		<p>Views: {{recipe.views}}</p>
 		<hr>
 	{% endfor %}
 {% endblock %}

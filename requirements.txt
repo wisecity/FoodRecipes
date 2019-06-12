@@ -4,3 +4,4 @@ Flask-Wtf
 Flask-SQLAlchemy
 uwsgi
 flask_jwt_extended
+flask_login

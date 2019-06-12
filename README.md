@@ -13,3 +13,11 @@ To run:
 
 >Inside FoodRecipes directory, python app.py
 
+
+
+
+https://foodrecipe495.herokuapp.com/login
+https://foodrecipe495.herokuapp.com/signup
+https://foodrecipe495.herokuapp.com/account
+https://foodrecipe495.herokuapp.com/addrecipe
+https://foodrecipe495.herokuapp.com/showrecipes
