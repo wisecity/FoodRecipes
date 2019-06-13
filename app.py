@@ -209,10 +209,10 @@ def fresh_token_loader_callback():
 
 api.add_resource(RecipeFormation, '/recipe')
 api.add_resource(RecipeManipulation, '/recipe/<string:recipeName>')
-api.add_resource(UserRecipes, '/recipe/<string:username>')
+api.add_resource(UserRecipes, '/user/<string:username>')
 api.add_resource(UserList, "/user/<int:userId>")
 api.add_resource(UserRegister, "/user")
-api.add_resource(UserLogin, "/login")
+api.add_resource(UserLogin, "/loginnn")
 api.add_resource(UserActivation, "/amiactive")
 api.add_resource(GetUsername, "/getusername")
 

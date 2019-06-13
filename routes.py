@@ -20,7 +20,7 @@ def addrecipe():
 			'details': form.details.data
 		}
 
-		response = requests.post(url="http://localhost:5000/recipe", params=_json, headers={"Authorization": "Bearer {}".format(access_token)})
+		response = requests.post(url="https://foodrecipe495.herokuapp.com/recipe", params=_json, headers={"Authorization": "Bearer {}".format(access_token)})
 		flash('Recipe Added.', 'success')
 		return redirect(url_for('allrecipes'))
 	else:	
@@ -35,11 +35,12 @@ def allrecipes():
 
 @app.route("/myrecipes")
 def myrecipes():
-	if requests.post(url="http://localhost:5000/amiactive", params={"access_token": access_token}):
-		response = requests.post(url="http://localhost:5000/getusername", headers={"Authorization": "Bearer {}".format(access_token)})
+	if requests.post(url="https://foodrecipe495.herokuapp.com/amiactive", params={"access_token": access_token}):
+		response = requests.post(url="https://foodrecipe495.herokuapp.com/getusername", headers={"Authorization": "Bearer {}".format(access_token)})
 		if response.status_code == 200:
 			username = response.json()['username']
-			recipes = requests.get(url="http://localhost:5000/recipe/{}".format(username), headers={"Authorization": "Bearer {}".format(access_token)}).json()
+			recipes = requests.get(url="https://foodrecipe495.herokuapp.com/user/{}".format(username), headers={"Authorization": "Bearer {}".format(access_token)}).json()
+			pprint(recipes)
 			return render_template('myrecipes.html', recipes=recipes, title="My Recipes", access_token=access_token)
 		else:
 			flash('No user found.', 'error')
@@ -53,7 +54,7 @@ def myrecipes():
 
 @app.route("/signup", methods=['GET', 'POST'])
 def signup():
-	if requests.post(url="http://localhost:5000/amiactive", params={"access_token": access_token}):
+	if requests.post(url="https://foodrecipe495.herokuapp.com/amiactive", params={"access_token": access_token}):
 		return redirect(url_for('myrecipes'))
 	else:
 		form = UserRegistrationForm()
@@ -76,7 +77,7 @@ def login():
 			'username': form.username.data,
 			'password': form.password.data
 		}
-		response = requests.post(url='http://localhost:5000/loginnn', params=_json)
+		response = requests.post(url='https://foodrecipe495.herokuapp.com/loginnn', params=_json)
 		if response.status_code == 200:
 			access_token = response.json()['access_token']
 			return redirect(url_for('myrecipes'))
