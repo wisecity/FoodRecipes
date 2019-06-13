@@ -42,7 +42,7 @@ def addrecipe():
 			'details': form.details.data
 		}
 
-		response = requests.post(url="http://localhost:5000/recipe", params=_json, headers={"Authorization": "Bearer {}".format(access_token)})
+		response = requests.post(url="https://foodrecipe495.herokuapp.com/recipe", params=_json, headers={"Authorization": "Bearer {}".format(access_token)})
 		print(response.json())
 		
 		# flash('Recipe Added.', 'success')
