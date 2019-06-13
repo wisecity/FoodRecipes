@@ -24,17 +24,23 @@ class RecipeFormation(Resource):
 
     @fresh_jwt_required
     def post(self):
-        username = get_jwt_identity()
-        user = User.find_by_username(User, username)
-        id = user.Id
-        if id is None:
-            return
+        '''
         args = RecipeFormation.parser.parse_args()
-        if Recipe.find_by_name(Recipe, args['Name']):
+        args['header']
+        '''
+        username = get_jwt_identity()
+        print("username" + username)
+        user = User.find_by_username(User, username)
+        id = user.id
+        if id is None:
+            return 400
+        args = RecipeFormation.parser.parse_args()
+        if Recipe.find_by_name(Recipe, args['name']):
             return {' Message': 'Recipe with the name {} already exists'.format(args['name'])}
-        item = Recipe(args['name'], args['post_ime'], args['contents'], args['details'], 0, 0, id)
+        item = Recipe(name=args['name'], post_time=args['post_time'], contents=args['contents'], details=args['details'], views=0, score=0, user_id=id)
         item.create_to()
         return item.json()
+
 
 class RecipeManipulation(Resource):
     parser = reqparse.RequestParser()
@@ -55,7 +61,7 @@ class RecipeManipulation(Resource):
         id = user.id
         item = Recipe.find_by_name(Recipe, recipeName)
         if item:
-            if item.Uid != id:
+            if item.user_id != id:
                 return {'Message': 'User {} is not authorized to do that'.format(username)}, 401
             Recipe.delete_by_Name(Recipe, recipeName)
             return {'Message': '{} has been deleted from records'.format(recipeName)}
@@ -82,10 +88,10 @@ class UserRegister(Resource):
                        "message": "User exists!"
                    }, 400
 
-        user = User(args["Username"], args["password"])
+        user = User(args["username"], args["password"])
         user.create_to()
         return {
-            "message": "User {} created!".format(args["Username"])
+            "message": "User {} created!".format(args["username"])
         }
 
 class UserLogin(Resource):
@@ -98,7 +104,7 @@ class UserLogin(Resource):
 
         user =  User.find_by_username(User, args["username"])
 
-        if user and user.Password == args["password"]:
+        if user and user.password == args["password"]:
             access_token = create_access_token(identity=user.username, fresh=True)
             refresh_token = create_refresh_token(identity=user.username)
 

@@ -10,6 +10,11 @@
 		<p>Score: {{recipe.score}}</p>
 		<p>Uid: {{recipe.user_id}}</p>
 		<p>Views: {{recipe.views}}</p>
+		<a href="{{url_for('deleterecipe', recipe_name=recipe.name)}}">Delete Recipe</a>
+		<br>
+		<a href="{{url_for('updaterecipe', recipe_name=recipe.name)}}">Update Recipe</a>
 		<hr>
 	{% endfor %}
+
 {% endblock %}
+
