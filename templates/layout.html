@@ -27,16 +27,20 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarToggle">
             <div class="navbar-nav mr-auto">
-
-                <a class="nav-item nav-link" href="{{ url_for('myrecipes') }}">My Recipes</a>
-                <a class="nav-item nav-link" href="{{ url_for('myrecipes') }}">Add Recipes</a>
+                {% if access_token %}
+                  <a class="nav-item nav-link" href="{{ url_for('myrecipes') }}">My Recipes</a>
+                  <a class="nav-item nav-link" href="{{ url_for('addrecipe') }}">Add Recipes</a>
+                {% endif %}
                 <a class="nav-item nav-link" href="{{ url_for('allrecipes') }}">All Recipes</a>
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
-                <a class="nav-item nav-link" href="{{ url_for('signout') }}">Sign out</a>
-                <a class="nav-item nav-link" href="{{ url_for('login') }}">Sign in</a>
-                <a class="nav-item nav-link" href="{{ url_for('signup') }}">Sign up</a>
+                {% if access_token %}
+                  <a class="nav-item nav-link" href="{{ url_for('signout') }}">Sign out</a>
+                {% else %}
+                  <a class="nav-item nav-link" href="{{ url_for('login') }}">Sign in</a>
+                  <a class="nav-item nav-link" href="{{ url_for('signup') }}">Sign up</a>
+                {% endif %}
             </div>
           </div>
         </div>

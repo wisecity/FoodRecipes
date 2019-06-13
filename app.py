@@ -2,7 +2,8 @@ from run import app, db
 from datetime import datetime
 from flask import jsonify
 from flask_restful import Resource, reqparse, Api
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_refresh_token_required, get_jwt_identity, fresh_jwt_required, JWTManager
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_refresh_token_required, get_jwt_identity, jwt_required, JWTManager
+import json
 
 api = Api(app)
 jwt = JWTManager(app)
@@ -15,6 +16,7 @@ class All_Recipes(Resource):
     def get(self):
         return {'Recipes': list(map(lambda x: x.json(), Recipe.query.all()))}
 
+
 class RecipeFormation(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('name', type=str, required=True, help='Name of the recipe')
@@ -22,12 +24,8 @@ class RecipeFormation(Resource):
     parser.add_argument('contents', type=str, required=True, help='Content of the recipe')
     parser.add_argument('details', type=str, required=True, help='Details of the recipe')
 
-    @fresh_jwt_required
+    @jwt_required
     def post(self):
-        '''
-        args = RecipeFormation.parser.parse_args()
-        args['header']
-        '''
         username = get_jwt_identity()
         print("username" + username)
         user = User.find_by_username(User, username)
@@ -54,7 +52,7 @@ class RecipeManipulation(Resource):
             return item.json()
         return {'Message': 'Recipe is not found'}
 
-    @fresh_jwt_required
+    @jwt_required
     def delete(self, recipeName):
         username = get_jwt_identity()
         user = User.find_by_username(User, username)
@@ -67,6 +65,7 @@ class RecipeManipulation(Resource):
             return {'Message': '{} has been deleted from records'.format(recipeName)}
         return {'Message': '{} is already not on the list'.format(recipeName)}
 
+
 class UserList(Resource):
     def get(self, userId):
         user = User.find_by_Id(userId)
@@ -75,6 +74,7 @@ class UserList(Resource):
         return {
                    "message": "User not found!"
                }, 404
+
 
 class UserRegister(Resource):
     parser = reqparse.RequestParser()
@@ -93,6 +93,33 @@ class UserRegister(Resource):
         return {
             "message": "User {} created!".format(args["username"])
         }
+
+
+class UserActivation(Resource):
+    parser = reqparse.RequestParser()
+    parser.add_argument('access_token', type=str, required=True, help='Access Token')
+
+    
+    def post(self):
+        args = UserActivation.parser.parse_args()
+        if args['access_token']:
+            print("Nice Access Token.")
+            return True
+        else:
+            print("There is no Access Token!!!")
+            return False
+
+
+class GetUsername(Resource):
+    @jwt_required
+    def post(self):
+        username = get_jwt_identity()
+        print("*************Username: {}".format(username))
+        return {
+                   "username": username
+               }, 200
+
+
 
 class UserLogin(Resource):
     parser = reqparse.RequestParser()
@@ -117,11 +144,26 @@ class UserLogin(Resource):
                    "message": "Invalid credentials!"
                }, 401
 
+
 class UserRecipes(Resource):
     def get(self, username):
         user = User.find_by_username(User, username)
         if user:
-            return User.get_recipe_list(user)
+            _json = []
+            for recipe in User.get_recipe_list(user):
+
+                item = {}
+                item['id'] = recipe.id
+                item['name'] = recipe.name
+                item['post_time'] = str(recipe.post_time)
+                item['contents'] = recipe.contents
+                item['details'] = recipe.details
+                item['views'] = recipe.views
+                item['score'] = recipe.score
+                item['user_id'] = recipe.user_id
+                _json.append(item)
+            return _json
+
 
 @jwt.expired_token_loader
 def expired_token_callback():
@@ -163,11 +205,15 @@ def fresh_token_loader_callback():
     )
 
 
-api.add_resource(All_Recipes, '/aaa')
+# api.add_resource(All_Recipes, '/debugrecipes')
+
 api.add_resource(RecipeFormation, '/recipe')
 api.add_resource(RecipeManipulation, '/recipe/<string:recipeName>')
-api.add_resource(UserRecipes, '/user/<string:username>')
+api.add_resource(UserRecipes, '/recipe/<string:username>')
 api.add_resource(UserList, "/user/<int:userId>")
 api.add_resource(UserRegister, "/user")
-api.add_resource(UserLogin, "/loginnn")
+api.add_resource(UserLogin, "/login")
+api.add_resource(UserActivation, "/amiactive")
+api.add_resource(GetUsername, "/getusername")
+
 
