@@ -8,6 +8,9 @@ from pprint import pprint
 
 
 access_token = None
+# mainlink = "http://localhost:5000"
+mainlink = "https://foodrecipe495.herokuapp.com"
+
 			 
 @app.route("/addrecipe", methods=['GET', 'POST'])
 def addrecipe():
@@ -20,7 +23,7 @@ def addrecipe():
 			'details': form.details.data
 		}
 
-		response = requests.post(url="http://localhost:5000/recipe", params=_json, headers={"Authorization": "Bearer {}".format(access_token)})
+		response = requests.post(url="{}/recipe".format(mainlink), params=_json, headers={"Authorization": "Bearer {}".format(access_token)})
 		flash('Recipe Added.', 'success')
 		return redirect(url_for('allrecipes'))
 	else:	
@@ -29,17 +32,17 @@ def addrecipe():
 
 @app.route("/allrecipes")
 def allrecipes():
-	recipes = Recipe.query.all()
+	recipes = requests.get(url="{}/showrecipes".format(mainlink), headers={"Authorization": "Bearer {}".format(access_token)}).json()['Recipes']
 	return render_template('allrecipes.html', recipes=recipes, title="All Recipes", access_token=access_token)
 
 
 @app.route("/myrecipes")
 def myrecipes():
-	if requests.post(url="http://localhost:5000/amiactive", params={"access_token": access_token}):
-		response = requests.post(url="http://localhost:5000/getusername", headers={"Authorization": "Bearer {}".format(access_token)})
+	if requests.post(url="{}/amiactive".format(mainlink), params={"access_token": access_token}):
+		response = requests.post(url="{}/getusername".format(mainlink), headers={"Authorization": "Bearer {}".format(access_token)})
 		if response.status_code == 200:
 			username = response.json()['username']
-			recipes = requests.get(url="http://localhost:5000/user/{}".format(username), headers={"Authorization": "Bearer {}".format(access_token)}).json()
+			recipes = requests.get(url="{}/user/{}".format(mainlink, username), headers={"Authorization": "Bearer {}".format(access_token)}).json()
 			pprint(recipes)
 			return render_template('myrecipes.html', recipes=recipes, title="My Recipes", access_token=access_token)
 		else:
@@ -54,7 +57,7 @@ def myrecipes():
 
 @app.route("/signup", methods=['GET', 'POST'])
 def signup():
-	if requests.post(url="http://localhost:5000/amiactive", params={"access_token": access_token}):
+	if requests.post(url="{}/amiactive".format(mainlink), params={"access_token": access_token}):
 		return redirect(url_for('myrecipes'))
 	else:
 		form = UserRegistrationForm()
@@ -77,7 +80,7 @@ def login():
 			'username': form.username.data,
 			'password': form.password.data
 		}
-		response = requests.post(url='http://localhost:5000/loginnn', params=_json)
+		response = requests.post(url='{}/loginnn'.format(mainlink), params=_json)
 		if response.status_code == 200:
 			access_token = response.json()['access_token']
 			return redirect(url_for('myrecipes'))
@@ -99,13 +102,30 @@ def signout():
 
 @app.route("/deleterecipe/<string:recipe_name>", methods=['POST', 'GET'])
 def deleterecipe(recipe_name):
-	print("data: ")
-	return redirect(url_for('allrecipes'))
+	if requests.post(url="{}/amiactive".format(mainlink), params={"access_token": access_token}):
+		response = requests.delete(url="{}/recipe/{}".format(mainlink, recipe_name), headers={"Authorization": "Bearer {}".format(access_token)})
+		if response.status_code == 200:
+			flash('Item successfully deleted.', 'success')
+		else:
+			flash('Item did not deleted', 'error')
+		return redirect(url_for('allrecipes'))
+	else:
+		flash('Please login first.', 'error')
+		return redirect(url_for('login'))
 
 
+# Update isini Ahmet Utku ile konus.
 # Change addrecipe, so you can update recipe too.
 # Check it has recipe_name param.
 @app.route("/updaterecipe/<string:recipe_name>", methods=['POST', 'GET'])
 def updaterecipe(recipe_name):
-	print("data: ")
-	return redirect(url_for('addrecipe', recipe_name=recipe_name))
+	if requests.post(url="{}/amiactive".format(mainlink), params={"access_token": access_token}):
+		response = requests.update(url="{}/recipe/{}".format(mainlink, recipe_name), headers={"Authorization": "Bearer {}".format(access_token)})
+		if response.status_code == 200:
+			flash('Item successfully updated.', 'success')
+		else:
+			flash('Item did not updated', 'error')
+		return redirect(url_for('allrecipes'))
+	else:
+		flash('Please login first.', 'error')
+		return redirect(url_for('login'))

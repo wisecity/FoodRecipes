@@ -61,9 +61,9 @@ class RecipeManipulation(Resource):
         if item:
             if item.user_id != id:
                 return {'Message': 'User {} is not authorized to do that'.format(username)}, 401
-            Recipe.delete_by_Name(Recipe, recipeName)
-            return {'Message': '{} has been deleted from records'.format(recipeName)}
-        return {'Message': '{} is already not on the list'.format(recipeName)}
+            Recipe.delete_by_name(Recipe, recipeName)
+            return {'Message': '{} has been deleted from records'.format(recipeName)}, 200
+        return {'Message': '{} is already not on the list'.format(recipeName)}, 200
 
 
 class UserList(Resource):
@@ -205,8 +205,7 @@ def fresh_token_loader_callback():
     )
 
 
-# api.add_resource(All_Recipes, '/debugrecipes')
-
+api.add_resource(All_Recipes, '/showrecipes')
 api.add_resource(RecipeFormation, '/recipe')
 api.add_resource(RecipeManipulation, '/recipe/<string:recipeName>')
 api.add_resource(UserRecipes, '/user/<string:username>')
