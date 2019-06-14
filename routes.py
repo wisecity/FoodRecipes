@@ -8,8 +8,8 @@ from pprint import pprint
 
 
 access_token = None
-# mainlink = "http://localhost:5000"
-mainlink = "https://foodrecipesbil495.herokuapp.com"
+mainlink = "http://localhost:5000"
+# mainlink = "https://foodrecipesbil495.herokuapp.com"
 
 
 @app.route("/addrecipe", methods=['GET', 'POST'])
@@ -80,24 +80,27 @@ def signup():
 @app.route("/", methods=['GET', 'POST'])
 def login():
 	global access_token
-
-	form = UserLoginForm()
-	if form.validate_on_submit():
-		_json = {
-			'username': form.username.data,
-			'password': form.password.data
-		}
-		response = requests.post(url='{}/loginnn'.format(mainlink), params=_json)
-		if response.status_code == 200:
-			access_token = response.json()['access_token']
-			return redirect(url_for('myrecipes'))
-
-		else:
-			flash("No user found", 'success')
-			return redirect(url_for('login'))
-
+	if requests.post(url="{}/amiactive".format(mainlink), params={"access_token": access_token}):
+		return redirect(url_for('myrecipes'))
 	else:
-		return render_template('signin.html', title='Sign in', form=form)
+		form = UserLoginForm()
+		if form.validate_on_submit():
+			_json = {
+				'username': form.username.data,
+				'password': form.password.data
+			}
+			response = requests.post(url='{}/loginnn'.format(mainlink), params=_json)
+			if response.status_code == 200:
+				access_token = response.json()['access_token']
+				return redirect(url_for('myrecipes'))
+
+			else:
+				flash("No user found", 'success')
+				return render_template('signin.html', title='Sign in', form=form)
+		else:
+			# first enter goes here.
+			return render_template('signin.html', title='Sign in', form=form)
+
 
 
 @app.route("/signout")
