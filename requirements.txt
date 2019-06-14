@@ -6,3 +6,6 @@ uwsgi
 flask_jwt_extended
 flask_login
 requests
+json
+pprint
+wtforms
