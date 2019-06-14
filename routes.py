@@ -76,6 +76,7 @@ def signup():
 		return redirect(url_for('myrecipes'))
 	else:
 		form = UserRegistrationForm()
+		flash("Hata: {}".format(form.errors))
 		if form.validate_on_submit():
 			_json = {
 				'username': form.username.data,
