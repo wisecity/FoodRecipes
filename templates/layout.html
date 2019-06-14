@@ -27,7 +27,7 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarToggle">
             <div class="navbar-nav mr-auto">
-                {% if access_token %}
+                {% if session['access_token'] %}
                   <a class="nav-item nav-link" href="{{ url_for('myrecipes') }}">My Recipes</a>
                   <a class="nav-item nav-link" href="{{ url_for('addrecipe') }}">Add Recipes</a>
                 {% endif %}
@@ -35,7 +35,7 @@
             </div>
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
-                {% if access_token %}
+                {% if session['access_token'] %}
                   <a class="nav-item nav-link" href="{{ url_for('signout') }}">Sign out</a>
                 {% else %}
                   <a class="nav-item nav-link" href="{{ url_for('login') }}">Sign in</a>
