@@ -8,8 +8,8 @@ from pprint import pprint
 import os
 
 
-mainlink = "http://localhost:5000"
-# mainlink = "https://foodrecipesbil495.herokuapp.com"
+# mainlink = "http://localhost:5000"
+mainlink = "https://foodrecipesbil495.herokuapp.com"
 
 def chk_session():
 	try:
