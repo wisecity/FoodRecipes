@@ -3,6 +3,7 @@
 	<p>Signup page</p>
 	<div class="content-section">
         <form method="POST" action="">
+            {{ form.csrf_token }}
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">Sign Up</legend>
