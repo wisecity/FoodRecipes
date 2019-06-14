@@ -8,16 +8,19 @@ from pprint import pprint
 import os
 
 
-# mainlink = "http://localhost:5000"
-mainlink = "https://foodrecipesbil495.herokuapp.com"
+mainlink = "http://localhost:5000"
+# mainlink = "https://foodrecipesbil495.herokuapp.com"
 
 def chk_session():
 	try:
 		if session['access_token']:
+			flash("Access token found", 'success')
 			return True
 		else:
+			print("Access token is None", 'success')
 			return False
 	except:
+		print("Access token is not initialized", 'success')
 		return False
 
 
