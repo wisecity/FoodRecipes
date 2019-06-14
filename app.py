@@ -99,7 +99,7 @@ class UserActivation(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('access_token', type=str, required=True, help='Access Token')
 
-    
+
     def post(self):
         args = UserActivation.parser.parse_args()
         if args['access_token']:
@@ -214,5 +214,3 @@ api.add_resource(UserRegister, "/user")
 api.add_resource(UserLogin, "/loginnn")
 api.add_resource(UserActivation, "/amiactive")
 api.add_resource(GetUsername, "/getusername")
-
-

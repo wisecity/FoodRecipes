@@ -9,9 +9,9 @@ from pprint import pprint
 
 access_token = None
 # mainlink = "http://localhost:5000"
-mainlink = "https://foodrecipe495.herokuapp.com"
+mainlink = "https://foodrecipesbil495.herokuapp.com"
 
-			 
+
 @app.route("/addrecipe", methods=['GET', 'POST'])
 def addrecipe():
 	form = AddRecipeForm()
@@ -26,7 +26,7 @@ def addrecipe():
 		response = requests.post(url="{}/recipe".format(mainlink), params=_json, headers={"Authorization": "Bearer {}".format(access_token)})
 		flash('Recipe Added.', 'success')
 		return redirect(url_for('allrecipes'))
-	else:	
+	else:
 		return render_template('addrecipe.html', form=form, title="Add Recipe", access_token=access_token)
 
 
@@ -51,8 +51,8 @@ def myrecipes():
 	else:
 		flash('Please login first.', 'error')
 		return redirect(url_for('login'))
-	
-	
+
+
 
 
 @app.route("/signup", methods=['GET', 'POST'])
@@ -62,14 +62,21 @@ def signup():
 	else:
 		form = UserRegistrationForm()
 		if form.validate_on_submit():
-
+			_json = {
+				'username': form.username.data,
+				'password': form.password.data
+			}
+			response = requests.post(url='{}/user'.format(mainlink), params=_json)
+			if response.status_code != 200:
+				flash('Username already exists.')
+				return render_template('signup.html', title='Sign up', form=form, access_token=access_token)
 			flash('{} adli hesap olusturuldu.'.format(form.username.data), 'success')
 			return redirect(url_for('login'))
 		else:
 			return render_template('signup.html', title='Sign up', form=form, access_token=access_token)
 
 
-# Don't change it's name. to trigger @login_required decorator, it needs to be named as login. 
+# Don't change it's name. to trigger @login_required decorator, it needs to be named as login.
 @app.route("/", methods=['GET', 'POST'])
 def login():
 	global access_token
