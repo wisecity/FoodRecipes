@@ -8,8 +8,8 @@ from pprint import pprint
 
 
 access_token = None
-mainlink = "http://localhost:5000"
-# mainlink = "https://foodrecipesbil495.herokuapp.com"
+#mainlink = "http://localhost:5000"
+mainlink = "https://foodrecipesbil495.herokuapp.com"
 
 
 @app.route("/addrecipe", methods=['GET', 'POST'])
