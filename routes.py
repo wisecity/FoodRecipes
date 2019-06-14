@@ -28,7 +28,7 @@ def chk_session():
 def addrecipe():
 	if chk_session():
 		form = AddRecipeForm()
-		if form.validate_on_submit():
+		if form.is_submitted():
 			_json = {
 				'name': form.name.data,
 				'post_time' : "2011-10-05T23:31:12",
@@ -76,8 +76,7 @@ def signup():
 		return redirect(url_for('myrecipes'))
 	else:
 		form = UserRegistrationForm()
-		flash("Hata: {}".format(form.errors))
-		if form.validate_on_submit():
+		if form.is_submitted():
 			_json = {
 				'username': form.username.data,
 				'password': form.password.data
@@ -100,8 +99,7 @@ def login():
 		return redirect(url_for('myrecipes'))
 	else:
 		form = UserLoginForm()
-		flash("Hata: {}".format(form.errors))
-		if form.validate_on_submit():
+		if form.is_submitted():
 			_json = {
 				'username': form.username.data,
 				'password': form.password.data
