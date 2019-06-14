@@ -13,7 +13,10 @@ mainlink = "https://foodrecipesbil495.herokuapp.com"
 
 def chk_session():
 	try:
-		return session['access_token']
+		if session['access_token']:
+			return True
+		else:
+			return False
 	except:
 		return False
 
