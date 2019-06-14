@@ -8,8 +8,8 @@ from pprint import pprint
 import os
 
 
-mainlink = "http://localhost:5000"
-# mainlink = "https://foodrecipesbil495.herokuapp.com"
+# mainlink = "http://localhost:5000"
+mainlink = "https://foodrecipesbil495.herokuapp.com"
 
 def chk_session():
 	try:
@@ -88,6 +88,7 @@ def signup():
 			flash('{} adli hesap olusturuldu.'.format(form.username.data), 'success')
 			return redirect(url_for('login'))
 		else:
+			flash("Buraya girdi.", 'success')
 			return render_template('signup.html', title='Sign up', form=form)
 
 
