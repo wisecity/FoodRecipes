@@ -42,7 +42,7 @@ def addrecipe():
 			return render_template('addrecipe.html', form=form, title="Add Recipe")
 	else:
 		return redirect(url_for('login'))
-	
+
 
 @app.route("/allrecipes")
 def allrecipes():
@@ -137,7 +137,7 @@ def deleterecipe(recipe_name):
 	else:
 		flash('Please login first.', 'error')
 		return redirect(url_for('login'))
-	
+
 
 # Update isini Ahmet Utku ile konus.
 # Change addrecipe, so you can update recipe too.
@@ -151,8 +151,11 @@ def updaterecipe(recipe_name):
 		else:
 			flash('Item did not updated', 'error')
 		return redirect(url_for('allrecipes'))
-	
+
 	else:
 		flash('Please login first.', 'error')
 		return redirect(url_for('login'))
-	
+
+@app.route("/webstats")
+def get():
+	return render_template('git_stats_web/activity.html')
