@@ -1,5 +1,9 @@
 # FoodRecipes
 
+Gitstats Web : https://foodrecipe495.herokuapp.com/webstats
+Gitstats Android : https://foodrecipe495.herokuapp.com/androidstats
+
+
 Heroku:
 https://foodrecipe495.herokuapp.com/
 
