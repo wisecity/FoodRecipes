@@ -159,3 +159,7 @@ def updaterecipe(recipe_name):
 @app.route("/webstats")
 def get():
 	return render_template('git_stats_web/activity.html')
+
+@app.route("/androidstats")
+def getAndroid():
+	return render_template('git_stats_android/activity.html')
