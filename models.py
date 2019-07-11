@@ -97,6 +97,9 @@ class Recipe(db.Model):
 
 	def update_(self, cls):
 		_recipe = cls.query.filter_by(id=self.id).first()
+		print(_recipe, "-------")
+		print(_recipe.id)
+		print(_recipe.name)
 		_recipe.name = self.name
 		_recipe.post_time = self.post_time
 		_recipe.contents = self.contents
@@ -104,6 +107,9 @@ class Recipe(db.Model):
 		_recipe.views = self.views
 		_recipe.score = self.score
 		_recipe.user_id = self.user_id
+		print("----")
+		print(_recipe.id)
+		print(_recipe.name)
 		db.session.commit()
 
 	def add_recipe(self, username):

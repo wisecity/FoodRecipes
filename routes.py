@@ -6,6 +6,7 @@ import requests
 from flask import jsonify
 from pprint import pprint
 import os
+from werkzeug.datastructures import MultiDict
 
 
 mainlink = "http://localhost:5000"
@@ -27,8 +28,8 @@ def chk_session():
 		return False
 
 
-@app.route("/signup", methods=['GET', 'POST'])
-def signup():
+@app.route("/register", methods=['GET', 'POST'])
+def register():
 
 	if chk_session():
 		return redirect(url_for('myrecipes'))
@@ -39,18 +40,18 @@ def signup():
 				'username': form.username.data,
 				'password': form.password.data
 			}
-			response = requests.post(url='{}/user'.format(mainlink), params=_json)
-			print(response.json())
-			print(response.json()['status_code'])
+			response = requests.post(url='{}/api/register'.format(mainlink), params=_json)
+			print(response)
+			print(response.status_code)
 			print("===================")
-			if response.json()['status_code'] != 200:
+			if response.status_code != 200:
 				flash('Username already exists.')
-				return render_template('signup.html', title='Sign up', form=form)
+				return render_template('register.html', title='Register', form=form)
 			flash('{} adli hesap olusturuldu.'.format(form.username.data), 'success')
 			return redirect(url_for('login'))
 		else:
-			flash("Buraya girdi.", 'success')
-			return render_template('signup.html', title='Sign up', form=form)
+			flash("Buraya girdi.", 'warning')
+			return render_template('register.html', title='Register', form=form)
 
 
 # Don't change it's name. to trigger @login_required decorator, it needs to be named as login.
@@ -65,51 +66,51 @@ def login():
 				'username': form.username.data,
 				'password': form.password.data
 			}
-			response = requests.post(url='{}/loginnn'.format(mainlink), params=_json)
-			print(response.json())
-			print(response.json()['status_code'])
+			response = requests.post(url='{}/api/login'.format(mainlink), params=_json)
+			print(response)
+			print(response.status_code)
 			print("===================")
-			if response.json()['status_code'] == 200:
+			if response.status_code == 200:
 				access_token = response.json()['access_token']
 				session['access_token'] = access_token
 				return redirect(url_for('myrecipes'))
 
 			else:
 				flash("No user found", 'success')
-				return render_template('signin.html', title='Sign in', form=form)
+				return render_template('login.html', title='Sign in', form=form)
 		else:
 			# first enter goes here.
-			return render_template('signin.html', title='Sign in', form=form)
+			return render_template('login.html', title='Sign in', form=form)
 
 
-@app.route("/signout")
-def signout():
+@app.route("/logout")
+def logout():
 	session.pop('access_token', None)
 	return redirect(url_for('login'))
 
 
 @app.route("/allrecipes")
 def allrecipes():
-	recipes = requests.get(url="{}/showrecipes".format(mainlink)).json()['Recipes']
+	recipes = requests.get(url="{}/api/showAllRecipes".format(mainlink)).json()
 	return render_template('allrecipes.html', recipes=recipes, title="All Recipes")
 
 
 @app.route("/myrecipes")
 def myrecipes():
 	if chk_session():
-		response = requests.post(url="{}/getusername".format(mainlink), headers={"Authorization": "Bearer {}".format(session['access_token'])})
-		print(response.json())
-		print(response.json()['status_code'])
-		if response.json()['status_code'] == 200:
+		response = requests.post(url="{}/api/getUsername".format(mainlink), headers={"Authorization": "Bearer {}".format(session['access_token'])})
+		print(response)
+		print(response.status_code)
+		if response.status_code == 200:
 			username = response.json()['username']
-			recipes = requests.get(url="{}/user/{}".format(mainlink, username), headers={"Authorization": "Bearer {}".format(session['access_token'])}).json()
+			recipes = requests.get(url="{}/api/getUserRecipes/{}".format(mainlink, username), headers={"Authorization": "Bearer {}".format(session['access_token'])}).json()
 			pprint(recipes)
 			return render_template('myrecipes.html', recipes=recipes, title="My Recipes")
 		else:
-			flash('No user found.', 'error')
+			flash('No user found.', 'danger')
 			return redirect(url_for('login'))
 	else:
-		flash('Please login first.', 'error')
+		flash('Please login first.', 'danger')
 		return redirect(url_for('login'))
 
 
@@ -125,51 +126,77 @@ def addrecipe():
 				'details': form.details.data,
 				'tags': form.tags.data
 			}
-			response = requests.post(url="{}/recipe".format(mainlink), params=_json, headers={"Authorization": "Bearer {}".format(session['access_token'])})
-			print(response.json())
+			response = requests.post(url="{}/api/addRecipe".format(mainlink), params=_json, headers={"Authorization": "Bearer {}".format(session['access_token'])})
+			print(response)
 			print(response.status_code)
 			flash('Recipe Added.', 'success')
 			return redirect(url_for('allrecipes'))
 		else:
 			return render_template('addrecipe.html', form=form, title="Add Recipe")
 	else:
-		flash('Please login first.', 'success')
+		flash('Please login first.', 'danger')
 		return redirect(url_for('login'))
 
 
-@app.route("/deleterecipe/<string:recipe_name>", methods=['POST', 'GET'])
-def deleterecipe(recipe_name):
+@app.route("/deleterecipe/<int:recipe_id>", methods=['POST', 'GET'])
+def deleterecipe(recipe_id):
 	if chk_session():
-		response = requests.delete(url="{}/recipe/{}".format(mainlink, recipe_name), headers={"Authorization": "Bearer {}".format(session['access_token'])})
-		print(response.json())
-		print(response.json()['status_code'])
-		if response.json()['status_code'] == 200:
+		response = requests.delete(url="{}/api/recipeManipulation/{}".format(mainlink, recipe_id), headers={"Authorization": "Bearer {}".format(session['access_token'])})
+		print(response)
+		print(response.status_code)
+		if response.status_code == 200:
 			flash('Item successfully deleted.', 'success')
 		else:
-			flash('You are not authorized to delete this item.', 'success')
+			flash('You are not authorized to delete this item.', 'danger')
 		return redirect(url_for('allrecipes'))
 	else:
-		flash('Please login first.', 'success')
+		flash('Please login first.', 'danger')
 		return redirect(url_for('login'))
 
 
 # Update isini Ahmet Utku ile konus.
 # Change addrecipe, so you can update recipe too.
 # Check it has recipe_name param.
-@app.route("/updaterecipe/<string:recipe_name>", methods=['POST', 'GET'])
-def updaterecipe(recipe_name):
+@app.route("/updaterecipe/<int:recipe_id>", methods=['POST', 'GET'])
+def updaterecipe(recipe_id):
 	if chk_session():
-		response = requests.put(url="{}/recipe/{}".format(mainlink, recipe_name), headers={"Authorization": "Bearer {}".format(session['access_token'])})
-		print(response.json())
-		print(response.json()['status_code'])
-		if response.json()['status_code'] == 200:
-			flash('Item successfully updated.', 'success')
+		authority_response = requests.get(url="{}/api/checkAuthority/{}".format(mainlink, recipe_id), headers={"Authorization": "Bearer {}".format(session['access_token'])})
+		print(authority_response)
+		if authority_response.status_code == 200:
+			response = requests.get(url="{}/api/getRecipe/{}".format(mainlink, recipe_id), headers={"Authorization": "Bearer {}".format(session['access_token'])}).json()
+			autofill_dict = MultiDict({'name': response['name'], 'contents': response['contents'], 'details': response['details']})
+			form = AddRecipeForm()
+			if form.is_submitted():
+				_json = {
+					'name': form.name.data,
+					'post_time' : "2011-10-05T23:31:12",
+					'contents': form.contents.data,
+					'details': form.details.data,
+					'tags': form.tags.data
+				}
+				print(form.name.data, "+++++")
+				response = requests.put(url="{}/api/recipeManipulation/{}".format(mainlink, recipe_id), params=_json, headers={"Authorization": "Bearer {}".format(session['access_token'])})
+				print(response.json())
+				print(response.status_code)
+				flash('Recipe Updated.', 'success')
+				return redirect(url_for('recipedetails', recipe_id=recipe_id))
+			else:
+				return render_template('updaterecipe.html', form=form, title="Update Recipe")
 		else:
-			flash('Item did not updated', 'error')
-		return redirect(url_for('allrecipes'))
-
+			flash('You are not authorized to update this.', 'danger')
+			return redirect(url_for('myrecipes'))
 	else:
-		flash('Please login first.', 'error')
+		flash('Please login first.', 'danger')
+		return redirect(url_for('login'))
+
+
+@app.route("/recipedetails/<int:recipe_id>", methods=['POST', 'GET'])
+def recipedetails(recipe_id):
+	if chk_session():
+		response = requests.get(url="{}/api/getRecipe/{}".format(mainlink, recipe_id), headers={"Authorization": "Bearer {}".format(session['access_token'])})
+		return render_template('recipedetails.html', recipe=response.json())
+	else:
+		flash('Please login first.', 'danger')
 		return redirect(url_for('login'))
 
 @app.route("/webstats")
