@@ -16,6 +16,7 @@
     {% else %}
         <title>No Title</title>
     {% endif %}
+
 </head>
 <body>
 <header class="site-header">
@@ -36,10 +37,10 @@
             <!-- Navbar Right Side -->
             <div class="navbar-nav">
                 {% if session['access_token'] %}
-                  <a class="nav-item nav-link" href="{{ url_for('signout') }}">Sign out</a>
+                  <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
                 {% else %}
-                  <a class="nav-item nav-link" href="{{ url_for('login') }}">Sign in</a>
-                  <a class="nav-item nav-link" href="{{ url_for('signup') }}">Sign up</a>
+                  <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
+                  <a class="nav-item nav-link" href="{{ url_for('register') }}">Register</a>
                 {% endif %}
             </div>
           </div>
@@ -62,6 +63,7 @@
         </div>
       </div>
     </main>
+
 
   <!-- Optional JavaScript -->
   <!-- jQuery first, then Popper.js, then Bootstrap JS -->
