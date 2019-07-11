@@ -8,3 +8,4 @@ flask_login
 requests
 pprint
 wtforms
+flask_appbuilder
