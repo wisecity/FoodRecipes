@@ -47,4 +47,5 @@ class AddRecipeForm(FlaskForm):
 	name = StringField('Name', validators=[DataRequired()])
 	contents = StringField('Contents', validators=[DataRequired()])
 	details = StringField('Details', validators=[DataRequired()])
+	tags = StringField('Tags')
 	submit = SubmitField('Submit Recipe')
