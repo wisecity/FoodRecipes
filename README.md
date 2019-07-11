@@ -20,8 +20,12 @@ To run:
 
 
 
-https://foodrecipe495.herokuapp.com/login
-https://foodrecipe495.herokuapp.com/signup
-https://foodrecipe495.herokuapp.com/account
+https://foodrecipe495.herokuapp.com/
+
+https://foodrecipe495.herokuapp.com/register
+
 https://foodrecipe495.herokuapp.com/addrecipe
+
 https://foodrecipe495.herokuapp.com/showrecipes
+
+https://foodrecipe495.herokuapp.com/recipedetails/1
