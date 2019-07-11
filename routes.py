@@ -9,8 +9,8 @@ import os
 from werkzeug.datastructures import MultiDict
 
 
-mainlink = "http://localhost:5000"
-# mainlink = "https://foodrecipesbil495.herokuapp.com"
+# mainlink = "http://localhost:5000"
+mainlink = "https://foodrecipesbil495.herokuapp.com"
 
 # session login olunmadiginda init edilmemis oluyor.
 # session login olunca 'access_token' elemani ekleniyor.
