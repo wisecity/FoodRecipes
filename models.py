@@ -1,6 +1,138 @@
 from datetime import datetime
 from run import login_manager, db
+from flask_appbuilder.models.mixins import ImageColumn
 
+class Ingredient_Photos(db.Model):
+	__tablename__ = 'INGREDIENT_PHOTOS'
+	id = db.Column(db.Integer, primary_key=True)
+	recipe_id = db.Column(db.Integer, db.ForeignKey('RECIPE.id'), nullable=False)
+	photo = db.Column(ImageColumn(size=(300, 300, True), thumbnail_size=(30, 30, True)))
+
+	def __init__(self, recipe_id, photo_location):
+		self.recipe_id = recipe_id
+	
+	def json(self):
+		return {'id': self.id, 'recipe_id' : self.recipe_id}
+
+	@classmethod
+	def add_photo(self, name, username):
+		_user = User.query.filter_by(username=username).first()
+		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
+		self.recipe_id = _recipe.id
+		db.session.add(self)
+		db.session.commit()
+
+	def delete_photo(self, name, username):
+		_user = User.query.filter_by(username=username).first()
+		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
+		Ingredient_Photos.query.filter_by(recipe_id = _recipe.id, id = self.id).delete()
+		db.session.commit()
+
+	def get_photos(self, name, username):
+		_user = User.query.filter_by(username=username).first()
+		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
+		photoList = Ingredient_Photos.query.filter_by(recipe_id = _recipe.id).all()
+		return photoList
+
+
+class Step_Photos(db.Model):
+	__tablename__ = 'STEP_PHOTOS'
+	id = db.Column(db.Integer, primary_key=True)
+	recipe_id = db.Column(db.Integer, db.ForeignKey('RECIPE.id'), nullable=False)
+	photo = db.Column(ImageColumn(size=(300, 300, True), thumbnail_size=(30, 30, True)))
+
+	def __init__(self, recipe_id, photo_location):
+		self.recipe_id = recipe_id
+
+	def json(self):
+		return {'id': self.id, 'recipe_id' : self.recipe_id,}
+
+	@classmethod
+	def add_photo(self, name, username):
+		_user = User.query.filter_by(username=username).first()
+		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
+		self.recipe_id = _recipe.id
+		db.session.add(self)
+		db.session.commit()
+
+	def delete_photo(self, name, username):
+		_user = User.query.filter_by(username=username).first()
+		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
+		Step_Photos.query.filter_by(recipe_id = _recipe.id, id = self.id).delete()
+		db.session.commit()
+	
+	def get_photos(self, name, username):
+		_user = User.query.filter_by(username=username).first()
+		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
+		photoList = Step_Photos.query.filter_by(recipe_id = _recipe.id).all()
+		return photoList
+
+
+class Final_Photos(db.Model):
+	__tablename__ = 'FINAL_PHOTOS'
+	id = db.Column(db.Integer, primary_key=True)
+	recipe_id = db.Column(db.Integer, db.ForeignKey('RECIPE.id'), nullable=False)
+	photo = db.Column(ImageColumn(size=(300, 300, True), thumbnail_size=(30, 30, True)))
+
+	def __init__(self, recipe_id, photo_location):
+		self.recipe_id = recipe_id
+		self.photo_location = photo_location
+
+	def json(self):
+		return {'id': self.id, 'recipe_id' : self.recipe_id}
+
+	@classmethod
+	def add_photo(self, name, username):
+		_user = User.query.filter_by(username=username).first()
+		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
+		self.recipe_id = _recipe.id
+		db.session.add(self)
+		db.session.commit()
+
+	def delete_photo(self, name, username):
+		_user = User.query.filter_by(username=username).first()
+		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
+		Final_Photos.query.filter_by(recipe_id = _recipe.id, id = self.id).delete()
+		db.session.commit()
+
+	def get_photos(self, name, username):
+		_user = User.query.filter_by(username=username).first()
+		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
+		photoList = Final_Photos.query.filter_by(recipe_id = _recipe.id).all()
+		return photoList
+
+class Tags(db.Model):
+		__tablename__ = 'TAGS'
+		id = db.Column(db.Integer, primary_key=True)
+		recipe_id = db.Column(db.Integer, db.ForeignKey('RECIPE.id'), nullable=False)
+		name = db.Column(db.String(32))
+
+		def __init__(self, recipe_id, name):
+			self.recipe_id = recipe_id
+			self.name = name
+
+		def json(self):
+			return {'id': self.id, 'recipe_id' : self.recipe_id, 'name': self.name}
+
+		@classmethod
+		def add_tag(self, name, username):
+			_user = User.query.filter_by(username=username).first()
+			_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
+			self.recipe_id = _recipe.id
+			db.session.add(self)
+			db.session.commit()
+
+		def delete_tag(self, name, username):
+			_user = User.query.filter_by(username=username).first()
+			_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
+			Tags.query.filter_by(recipe_id = _recipe.id, id = self.id).delete()
+			db.session.commit()
+
+		def get_tags(self, name, username):
+			_user = User.query.filter_by(username=username).first()
+			_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
+			tagList = Tags.query.filter_by(recipe_id = _recipe.id).all()
+			return tagList
 
 class User(db.Model):
 	__tablename__ = 'USER'
@@ -80,19 +212,12 @@ class Recipe(db.Model):
 	def find_by_id(cls, id):
 		return cls.query.filter_by(id=id).first()
 
-	def find_by_name(cls, recipename):
-		return cls.query.filter_by(name=recipename).first()
-
 	def create_to(self):
 		db.session.add(self)
 		db.session.commit()
 
 	def delete_by_id(cls, id):
 		cls.query.filter_by(id=id).delete()
-		db.session.commit()
-
-	def delete_by_name(cls, name):
-		cls.query.filter_by(name=name).delete()
 		db.session.commit()
 
 	def update_(self, cls):
@@ -144,103 +269,4 @@ class Recipe(db.Model):
 		db.session.commit()
 
 
-	class Ingredient_Photos(db.Model):
-		__tablename__ = 'INGREDIENT_PHOTOS'
-		id = db.Column(db.Integer, primary_key=True)
-		recipe_id = db.Column(db.Integer, db.ForeignKey('RECIPE.id'), nullable=False)
-		photo_location = db.Column(db.String(100))
-
-		def __init__(self, recipe_id, photo_location):
-			self.recipe_id = recipe_id
-			self.photo_location = photo_location
-		
-		def json(self):
-			return {'id': self.id, 'recipe_id' : self.recipe_id, 'photo_location': self.photo_location}
-
-		@classmethod
-		def add_photo(self, name, username):
-			_user = User.query.filter_by(username=username).first()
-			_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-			self.recipe_id = _recipe.id
-			db.session.add(self)
-			db.session.commit()
-
-		def delete_photo(self, name, username):
-			_user = User.query.filter_by(username=username).first()
-			_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-			Ingredient_Photos.query.filter_by(recipe_id = _recipe.id, id = self.id).delete()
-			db.session.commit()
-
-		def get_photos(self, name, username):
-			_user = User.query.filter_by(username=username).first()
-			_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-			photoList = Ingredient_Photos.query.filter_by(recipe_id = _recipe.id).all()
-			return photoList
-
-
-	class Step_Photos(db.Model):
-		__tablename__ = 'STEP_PHOTOS'
-		id = db.Column(db.Integer, primary_key=True)
-		recipe_id = db.Column(db.Integer, db.ForeignKey('RECIPE.id'), nullable=False)
-		photo_location = db.Column(db.String(100))
-
-		def __init__(self, recipe_id, photo_location):
-			self.recipe_id = recipe_id
-			self.photo_location = photo_location
-
-		def json(self):
-			return {'id': self.id, 'recipe_id' : self.recipe_id, 'photo_location': self.photo_location}
-
-		@classmethod
-		def add_photo(self, name, username):
-			_user = User.query.filter_by(username=username).first()
-			_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-			self.recipe_id = _recipe.id
-			db.session.add(self)
-			db.session.commit()
-
-		def delete_photo(self, name, username):
-			_user = User.query.filter_by(username=username).first()
-			_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-			Step_Photos.query.filter_by(recipe_id = _recipe.id, id = self.id).delete()
-			db.session.commit()
-		
-		def get_photos(self, name, username):
-			_user = User.query.filter_by(username=username).first()
-			_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-			photoList = Step_Photos.query.filter_by(recipe_id = _recipe.id).all()
-			return photoList
-
-
-	class Final_Photos(db.Model):
-		__tablename__ = 'FINAL_PHOTOS'
-		id = db.Column(db.Integer, primary_key=True)
-		recipe_id = db.Column(db.Integer, db.ForeignKey('RECIPE.id'), nullable=False)
-		photo_location = db.Column(db.String(100))
-
-		def __init__(self, recipe_id, photo_location):
-			self.recipe_id = recipe_id
-			self.photo_location = photo_location
-
-		def json(self):
-			return {'id': self.id, 'recipe_id' : self.recipe_id, 'photo_location': self.photo_location}
-
-		@classmethod
-		def add_photo(self, name, username):
-			_user = User.query.filter_by(username=username).first()
-			_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-			self.recipe_id = _recipe.id
-			db.session.add(self)
-			db.session.commit()
-
-		def delete_photo(self, name, username):
-			_user = User.query.filter_by(username=username).first()
-			_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-			Final_Photos.query.filter_by(recipe_id = _recipe.id, id = self.id).delete()
-			db.session.commit()
-
-		def get_photos(self, name, username):
-			_user = User.query.filter_by(username=username).first()
-			_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-			photoList = Final_Photos.query.filter_by(recipe_id = _recipe.id).all()
-			return photoList
+	
