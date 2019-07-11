@@ -13,6 +13,8 @@ from routes import *
 
 
 class All_Recipes(Resource):
+	return {'Recipes': list(map(lambda x: x.json(), db.session.query(Recipe).all() ))}
+	'''
 	def get(self):
 		_json = []
 		for recipe in db.session.query(Recipe).all():
@@ -26,12 +28,33 @@ class All_Recipes(Resource):
 			item['score'] = recipe.score
 			item['user_id'] = recipe.user_id
 			_json.append(item)
-		return _json
-		# return {'Recipes': list(map(lambda x: x.json(), db.session.query(Recipe).all() ))}
+		return _json '''
+	
 
 
 
 class PostRecipe(Resource):
+	parser = reqparse.RequestParser()
+    parser.add_argument('name', type=str, required=True, help='Name of the recipe')
+    parser.add_argument('post_time', type=lambda x: datetime.strptime(x,'%Y-%m-%dT%H:%M:%S'), required=True, help='Date of the recipe needs to be checked')
+    parser.add_argument('contents', type=str, required=True, help='Content of the recipe')
+    parser.add_argument('details', type=str, required=True, help='Details of the recipe')
+
+    @jwt_required
+    def post(self):
+        username = get_jwt_identity()
+        print("username" + username)
+        user = User.find_by_username(User, username)
+        id = user.id
+        if id is None:
+            return 400
+        args = RecipeFormation.parser.parse_args()
+        if Recipe.find_by_name(Recipe, args['name']):
+            return {' Message': 'Recipe with the name {} already exists'.format(args['name'])}
+        item = Recipe(name=args['name'], post_time=args['post_time'], contents=args['contents'], details=args['details'], views=0, score=0, user_id=id)
+        item.create_to()
+        return item.json()
+	'''
 	parser = reqparse.RequestParser()
 	parser.add_argument('name', type=str, required=True, help='Name of the recipe')
 	parser.add_argument('post_time', type=lambda x: datetime.strptime(x,'%Y-%m-%dT%H:%M:%S'), required=True, help='Date of the recipe needs to be checked')
@@ -59,7 +82,7 @@ class PostRecipe(Resource):
 		if args['tags'] != "":
 			for tag in args['tags'].split("-"):
 				tag = Tags(name=tag)
-		return jsonify(item=item.json(), status_code=200)
+		return jsonify(item=item.json(), status_code=200) '''
 
 
 class GetRecipe(Resource):
