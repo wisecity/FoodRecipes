@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 # from flask_login import current_user -- to validate
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 
 
@@ -49,3 +49,10 @@ class AddRecipeForm(FlaskForm):
 	details = StringField('Details', validators=[DataRequired()])
 	tags = StringField('Tags')
 	submit = SubmitField('Submit Recipe')
+
+
+class SearchForm(FlaskForm):
+	STATE_CHOICES = [('USERNAME', 'username'), ('NAME', 'recipe name'), ('TAG','tag'), ('CONTENT', 'content'), ('DETAILS', 'details')]
+	search_type = SelectField(label='Filter By', choices=STATE_CHOICES)
+	searched_keyword = StringField(label='Keyword', validators=[DataRequired()])
+	submit = SubmitField('Search!')

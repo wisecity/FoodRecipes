@@ -1,5 +1,20 @@
 {% extends "layout.html" %}
 {% block content %}
+	<form method="POST" action="">
+		{{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.search_type.label(class="form-control-label") }}
+            {{ form.search_type(class="form-control form-control-lg") }}
+        </div>
+        <div class="form-group">
+            {{ form.searched_keyword.label(class="form-control-label") }}
+            {{ form.searched_keyword(class="form-control form-control-lg") }}
+        </div>
+        <div class="form-group">
+            {{ form.submit(class="btn btn-outline-info") }}
+        </div>
+	</form>
+
 	<h3> All Recipes </h3>
 	<hr>
 	{% for recipe in recipes %}
@@ -10,11 +25,7 @@
 		<p>Score: {{recipe.score}}</p>
 		<p>Uid: {{recipe.user_id}}</p>
 		<p>Views: {{recipe.views}}</p>
-		<a href="{{url_for('deleterecipe', recipe_id=recipe.id)}}">Delete Recipe</a>
-		<br>
-		<a href="{{url_for('updaterecipe', recipe_id=recipe.id)}}">Update Recipe</a>
-		<br>
-		<a href="{{url_for('recipedetails', recipe_id=recipe.id)}}">Recipe Details</a>
+
 		<hr>
 		
 	{% endfor %}
