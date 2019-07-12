@@ -1,7 +1,7 @@
 from run import app, db
 from flask import render_template, url_for, flash, redirect, request, session
 from models import Recipe, User
-from forms import AddRecipeForm, UserRegistrationForm, UserLoginForm
+from forms import AddRecipeForm, UserRegistrationForm, UserLoginForm, SearchForm
 import requests
 from flask import jsonify
 from pprint import pprint
@@ -9,8 +9,8 @@ import os
 from werkzeug.datastructures import MultiDict
 
 
-# mainlink = "http://localhost:5000"
-mainlink = "https://foodrecipesbil495.herokuapp.com"
+mainlink = "http://localhost:5000"
+# mainlink = "https://foodrecipesbil495.herokuapp.com"
 
 # session login olunmadiginda init edilmemis oluyor.
 # session login olunca 'access_token' elemani ekleniyor.
@@ -89,17 +89,23 @@ def logout():
 	return redirect(url_for('login'))
 
 
-@app.route("/allrecipes")
+@app.route("/allrecipes", methods=['GET', 'POST'])
 def allrecipes():
-	recipes = requests.get(url="{}/api/showAllRecipes".format(mainlink)).json()
-	return render_template('allrecipes.html', recipes=recipes, title="All Recipes")
+	form = SearchForm()
+	if form.is_submitted():
+		_json = {'search_type': form.search_type.data, 'searched_keyword': form.searched_keyword.data}
+		recipes = requests.get(url="{}/api/showAllRecipes".format(mainlink), params=_json).json()
+	else:
+		recipes = requests.get(url="{}/api/showAllRecipes".format(mainlink)).json()
+	print(recipes)
+	return render_template('allrecipes.html', recipes=recipes, title="All Recipes", form=form)
 
 
-@app.route("/myrecipes")
+@app.route("/myrecipes", methods=['GET', 'POST'])
 def myrecipes():
 	if chk_session():
 		response = requests.post(url="{}/api/getUsername".format(mainlink), headers={"Authorization": "Bearer {}".format(session['access_token'])})
-		print(response)
+		print(response.json())
 		print(response.status_code)
 		if response.status_code == 200:
 			username = response.json()['username']
@@ -121,13 +127,12 @@ def addrecipe():
 		if form.is_submitted():
 			_json = {
 				'name': form.name.data,
-				'post_time' : "2011-10-05T23:31:12",
 				'contents': form.contents.data,
 				'details': form.details.data,
 				'tags': form.tags.data
 			}
 			response = requests.post(url="{}/api/addRecipe".format(mainlink), params=_json, headers={"Authorization": "Bearer {}".format(session['access_token'])})
-			print(response)
+			print(response.json())
 			print(response.status_code)
 			flash('Recipe Added.', 'success')
 			return redirect(url_for('allrecipes'))
@@ -164,12 +169,14 @@ def updaterecipe(recipe_id):
 		print(authority_response)
 		if authority_response.status_code == 200:
 			response = requests.get(url="{}/api/getRecipe/{}".format(mainlink, recipe_id), headers={"Authorization": "Bearer {}".format(session['access_token'])}).json()
-			autofill_dict = MultiDict({'name': response['name'], 'contents': response['contents'], 'details': response['details']})
-			form = AddRecipeForm()
+			autofill_dict = MultiDict({'name': response['name'], 'contents': response['contents'], 'details': response['details'], 'tags': response['tags']})
+			if request.method == 'GET':
+				form = AddRecipeForm(formdata=autofill_dict)
+			else:
+				form = AddRecipeForm()
 			if form.is_submitted():
 				_json = {
 					'name': form.name.data,
-					'post_time' : "2011-10-05T23:31:12",
 					'contents': form.contents.data,
 					'details': form.details.data,
 					'tags': form.tags.data
