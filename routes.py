@@ -101,11 +101,11 @@ def allrecipes():
 	return render_template('allrecipes.html', recipes=recipes, title="All Recipes", form=form)
 
 
-@app.route("/myrecipes")
+@app.route("/myrecipes", methods=['GET', 'POST'])
 def myrecipes():
 	if chk_session():
 		response = requests.post(url="{}/api/getUsername".format(mainlink), headers={"Authorization": "Bearer {}".format(session['access_token'])})
-		print(response)
+		print(response.json())
 		print(response.status_code)
 		if response.status_code == 200:
 			username = response.json()['username']
@@ -127,13 +127,12 @@ def addrecipe():
 		if form.is_submitted():
 			_json = {
 				'name': form.name.data,
-				'post_time' : "2011-10-05T23:31:12",
 				'contents': form.contents.data,
 				'details': form.details.data,
 				'tags': form.tags.data
 			}
 			response = requests.post(url="{}/api/addRecipe".format(mainlink), params=_json, headers={"Authorization": "Bearer {}".format(session['access_token'])})
-			print(response)
+			print(response.json())
 			print(response.status_code)
 			flash('Recipe Added.', 'success')
 			return redirect(url_for('allrecipes'))
@@ -178,7 +177,6 @@ def updaterecipe(recipe_id):
 			if form.is_submitted():
 				_json = {
 					'name': form.name.data,
-					'post_time' : "2011-10-05T23:31:12",
 					'contents': form.contents.data,
 					'details': form.details.data,
 					'tags': form.tags.data

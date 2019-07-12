@@ -10,6 +10,7 @@ jwt = JWTManager(app)
 
 from models import Recipe, User, Tags
 from routes import *
+import datetime
 
 
 class All_Recipes(Resource):
@@ -41,12 +42,14 @@ class All_Recipes(Resource):
 			
 		_json = []
 		for recipe in recipes:
+			user = User.find_by_id(recipe.user_id)
 			item = {}
 			item['id'] = recipe.id
 			item['name'] = recipe.name
-			item['post_time'] = str(recipe.post_time)
 			item['contents'] = recipe.contents
+			item['username'] = user.username
 			item['details'] = recipe.details
+			item['tags'] = Tags.find_by_recipe_id(recipe.id)
 			item['views'] = recipe.views
 			item['score'] = recipe.score
 			item['user_id'] = recipe.user_id
@@ -57,15 +60,15 @@ class All_Recipes(Resource):
 class PostRecipe(Resource):
 	parser = reqparse.RequestParser()
 	parser.add_argument('name', type=str, required=True, help='Name of the recipe')
-	parser.add_argument('post_time', type=lambda x: datetime.strptime(x,'%Y-%m-%dT%H:%M:%S'), required=True, help='Date of the recipe needs to be checked')
 	parser.add_argument('contents', type=str, required=True, help='Content of the recipe')
 	parser.add_argument('details', type=str, required=True, help='Details of the recipe')
 	parser.add_argument('tags', type=str, required=False, help='Tags of the recipe')
+	# parser.add_argument('post_time', type=lambda x: datetime.strptime(x,'%Y-%m-%dT%H:%M:%S'), required=False, help='Date of the recipe needs to be checked')
+
 
 	@jwt_required
 	def post(self):
 		username = get_jwt_identity()
-		print("username: " + username)
 		user = User.find_by_username(username)
 		id = user.id
 		if id is None:
@@ -73,13 +76,15 @@ class PostRecipe(Resource):
 
 		args = PostRecipe.parser.parse_args()
 		print("Tags: ", args['tags'])
-		item = Recipe(name=args['name'], post_time=args['post_time'], contents=args['contents'], details=args['details'], views=0, score=0, user_id=id)
+		item = Recipe(name=args['name'], contents=args['contents'], details=args['details'], views=0, score=0, user_id=id)
 		recipe_id = item.add_recipe()
 
+		
 		if args['tags'] != "":
 			for tag_name in args['tags'].split("-"):
 				tag = Tags(recipe_id=recipe_id, name=tag_name)
 				tag.add_tag()
+		
 		return jsonify(item=item.json(), status_code=200)
 
 
@@ -88,13 +93,14 @@ class GetRecipe(Resource):
 		item = Recipe.find_by_id(recipeId)
 		if item:
 			Recipe.increase_view(item)
+			user = User.find_by_id(item.user_id)
 			_json = {}
 			_json['id'] = item.id
 			_json['name'] = item.name
 			_json['contents'] = item.contents
 			_json['details'] = item.details
+			_json['username'] = user.username
 			_json['tags'] = Tags.find_by_recipe_id(item.id)
-			_json['post_time'] = str(item.post_time)
 			_json['views'] = item.views
 			_json['score'] = item.score
 			_json['user_id'] = item.user_id
@@ -119,7 +125,7 @@ class CheckAuthority(Resource):
 class RecipeManipulation(Resource):
 	parser = reqparse.RequestParser()
 	parser.add_argument('name', type=str, required=True, help='Name of the recipe')
-	parser.add_argument('post_time', type=lambda x: datetime.strptime(x,'%Y-%m-%dT%H:%M:%S'), required=True, help='Date of the recipe needs to be checked')
+	# parser.add_argument('post_time', type=lambda x: datetime.strptime(x,'%Y-%m-%dT%H:%M:%S'), required=True, help='Date of the recipe needs to be checked')
 	parser.add_argument('contents', type=str, required=True, help='Content of the recipe')
 	parser.add_argument('details', type=str, required=True, help='Details of the recipe')
 	parser.add_argument('tags', type=str, required=False, help='Tags of the recipe')
@@ -154,8 +160,12 @@ class RecipeManipulation(Resource):
 				item.name = args['name']
 				item.contents = args['contents']
 				item.details = args['details']
-				item.tags = args['tags']
 				item.update_recipe()
+
+				if args['tags'] != "":
+					for tag_name in args['tags'].split("-"):
+						tag = Tags(recipe_id=item.id, name=tag_name)
+						tag.add_tag()
 				return {'Message': '{} has been updated.'.format(recipeId)}, 200
 		else:
 			return {'Message': '{} is already not on the list.'.format(recipeId)}, 200
@@ -219,7 +229,8 @@ class UserLogin(Resource):
 		user =  User.find_by_username(args["username"])
 
 		if user and user.password == args["password"]:
-			access_token = create_access_token(identity=user.username, fresh=True)
+			expires = datetime.timedelta(days=1)
+			access_token = create_access_token(identity=user.username, fresh=True, expires_delta=expires)
 			refresh_token = create_refresh_token(identity=user.username)
 			return {'access_token': access_token, 'refresh_token': refresh_token}, 200
 
@@ -233,11 +244,13 @@ class UserRecipes(Resource):
 		if user:
 			_json = []
 			for recipe in User.get_recipe_list(user):
-
+				user = User.find_by_id(recipe.user_id)
 				item = {}
 				item['id'] = recipe.id
 				item['name'] = recipe.name
-				item['post_time'] = str(recipe.post_time)
+				item['username'] = user.username
+				item['tags'] = Tags.find_by_recipe_id(item.id)
+				# item['post_time'] = str(recipe.post_time)
 				item['contents'] = recipe.contents
 				item['details'] = recipe.details
 				item['views'] = recipe.views

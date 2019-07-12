@@ -148,14 +148,13 @@ class Tags(db.Model):
 			for tag in tags:
 				tags_str += tag.name
 				tags_str += "-"
-			tags_str = tags_str[-1]
+			tags_str = tags_str[:-1]
 			return tags_str
 
 
 		def add_tag(self):
 			db.session.add(self)
 			db.session.commit()
-			print("Tag Self-id: ", self.id)
 			return self.id
 
 
@@ -163,7 +162,7 @@ class Tags(db.Model):
 			deleted_tag_id = self.id
 			Tags.query.filter_by(recipe_id=_recipe.id, name=tag_name).delete()
 			db.session.commit()
-			return self.id
+			return deleted_tag_id
 
 
 		def get_tags(self, recipe_id):
@@ -172,6 +171,41 @@ class Tags(db.Model):
 
 
 
+class Like(db.Model):
+	__tablename__ = 'LIKE'
+	id = db.Column(db.Integer, primary_key=True)
+	recipe_id = db.Column(db.Integer, db.ForeignKey('RECIPE.id'), nullable=False)
+	user_id = db.Column(db.Integer, db.ForeignKey('USER.id'), nullable=False)
+
+
+	def __init__(self, recipe_id, user_id):
+		self.recipe_id = recipe_id
+		self.user_id = user_id
+
+
+	def add_like(self):
+		db.session.add(self)
+		db.session.commit()
+		return self.id
+
+
+	def delete_like(self, recipe_id, user_id):
+		deleted_like_id = self.id
+		Like.query.filter_by(recipe_id=recipe_id, user_id=user_id).delete()
+		db.session.commit()
+		return deleted_like_id
+
+
+	# Helper to get_liked_posts()
+	# returns liked recipe's id
+	@staticmethod
+	def get_liked_by_user_id(user_id):
+		user = User.query.filter_by(user_id).first()
+		likes = Like.query.filter_by(user_id=user.id).all()
+		liked_posts_id = []
+		for like_item in likes:
+			liked_posts_id.append(like_item.recipe_id)
+		return liked_posts_id
 
 
 class User(db.Model):
@@ -300,6 +334,12 @@ class Recipe(db.Model):
 		return Recipe.query.filter_by(contents=contents).all()
 
 
+	def get_liked_posts(user_id):
+		ids = Like.get_liked_by_user_id(user_id)
+		
+
+
+
 	@staticmethod
 	def delete_by_id(id):
 		Recipe.query.filter_by(id=id).delete()
@@ -337,6 +377,6 @@ class Recipe(db.Model):
 		db.session.commit()
 
 
-
+db.create_all()
 
 	
