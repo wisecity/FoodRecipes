@@ -8,17 +8,38 @@
 	<p>Uid: {{recipe.user_id}}</p>
 	<p>Views: {{recipe.views}}</p>
 	<p><b>Final Photos</b></p>
-	{% for photo in photos %}
+	{% for photo in final_photos %}
     <img src= {{photo.photo_link}} width="100" height="100">
   {% endfor %}
-
-
 	<form action="/addfinalphoto" method="post" enctype="multipart/form-data">
          <input type="file" name="file">
          <input type="submit" value="Upload">
-				 <input type="text" name="photo_tag" value="photo tag">
+				 <input type="text" name="photo_tag" value="photo_tag">
 				 <input type="hidden" name="recipe_id" value={{recipe.id}} />
      </form>
+	<p><b>Ingredient Photos</b></p>
+	{% for photo in ingredient_photos %}
+    <img src= {{photo.photo_link}} width="100" height="100">
+  {% endfor %}
+	<form action="/addingredientphoto" method="post" enctype="multipart/form-data">
+         <input type="file" name="file">
+         <input type="submit" value="Upload">
+				 <input type="text" name="photo_tag" value="photo_tag">
+				 <input type="hidden" name="recipe_id" value={{recipe.id}} />
+     </form>
+
+	  <p><b>Step Photos</b></p>
+ 		{% for photo in step_photos %}
+ 	    <img src= {{photo.photo_link}} width="100" height="100">
+ 	  {% endfor %}
+ 		<form action="/addstepphoto" method="post" enctype="multipart/form-data">
+ 	         <input type="file" name="file">
+ 	         <input type="submit" value="Upload">
+ 					 <input type="text" name="photo_tag" value="photo_tag">
+ 					 <input type="hidden" name="recipe_id" value={{recipe.id}} />
+ 	     </form>
+	
+
 	<a href="{{url_for('deleterecipe', recipe_id=recipe.id)}}">Delete Recipe</a>
 	<br>
 	<a href="{{url_for('updaterecipe', recipe_id=recipe.id)}}">Update Recipe</a>

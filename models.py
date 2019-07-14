@@ -6,21 +6,16 @@ class Ingredient_Photos(db.Model):
 	__tablename__ = 'INGREDIENT_PHOTOS'
 	id = db.Column(db.Integer, primary_key=True)
 	recipe_id = db.Column(db.Integer, db.ForeignKey('RECIPE.id'), nullable=False)
-	photo = db.Column(ImageColumn(size=(300, 300, True), thumbnail_size=(30, 30, True)))
+	photo_link = db.Column(db.String)
 
-	def __init__(self, recipe_id, photo_location):
+	def __init__(self, recipe_id, photo_link):
 		self.recipe_id = recipe_id
+		self.photo_link = photo_link
 
 	def json(self):
 		return {'id': self.id, 'recipe_id' : self.recipe_id}
 
 	@classmethod
-	def add_photo(self, name, username):
-		_user = User.query.filter_by(username=username).first()
-		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-		self.recipe_id = _recipe.id
-		db.session.add(self)
-		db.session.commit()
 
 	def delete_photo(self, name, username):
 		_user = User.query.filter_by(username=username).first()
@@ -28,32 +23,29 @@ class Ingredient_Photos(db.Model):
 		Ingredient_Photos.query.filter_by(recipe_id = _recipe.id, id = self.id).delete()
 		db.session.commit()
 
-	def get_photos(self, name, username):
-		_user = User.query.filter_by(username=username).first()
-		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-		photoList = Ingredient_Photos.query.filter_by(recipe_id = _recipe.id).all()
+	def get_photos(recipe_id):
+		photoList = Ingredient_Photos.query.filter_by(recipe_id = recipe_id).all()
 		return photoList
+
+	def create_to(self):
+		db.session.add(self)
+		db.session.commit()
 
 
 class Step_Photos(db.Model):
 	__tablename__ = 'STEP_PHOTOS'
 	id = db.Column(db.Integer, primary_key=True)
 	recipe_id = db.Column(db.Integer, db.ForeignKey('RECIPE.id'), nullable=False)
-	photo = db.Column(ImageColumn(size=(300, 300, True), thumbnail_size=(30, 30, True)))
+	photo_link = db.Column(db.String)
 
-	def __init__(self, recipe_id, photo_location):
+	def __init__(self, recipe_id, photo_link):
 		self.recipe_id = recipe_id
+		self.photo_link = photo_link
 
 	def json(self):
-		return {'id': self.id, 'recipe_id' : self.recipe_id,}
+		return {'id': self.id, 'recipe_id' : self.recipe_id}
 
 	@classmethod
-	def add_photo(self, name, username):
-		_user = User.query.filter_by(username=username).first()
-		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-		self.recipe_id = _recipe.id
-		db.session.add(self)
-		db.session.commit()
 
 	def delete_photo(self, name, username):
 		_user = User.query.filter_by(username=username).first()
@@ -61,12 +53,13 @@ class Step_Photos(db.Model):
 		Step_Photos.query.filter_by(recipe_id = _recipe.id, id = self.id).delete()
 		db.session.commit()
 
-	def get_photos(self, name, username):
-		_user = User.query.filter_by(username=username).first()
-		_recipe = Recipe.query.filter_by(user_id = _user.id, name=name)
-		photoList = Step_Photos.query.filter_by(recipe_id = _recipe.id).all()
+	def get_photos(recipe_id):
+		photoList = Step_Photos.query.filter_by(recipe_id = recipe_id).all()
 		return photoList
 
+	def create_to(self):
+		db.session.add(self)
+		db.session.commit()
 
 class Final_Photos(db.Model):
 	__tablename__ = 'FINAL_PHOTOS'
@@ -79,7 +72,7 @@ class Final_Photos(db.Model):
 		self.photo_link = photo_link
 
 	def json(self):
-		return {'id': self.id, 'recipe_id' : self.recipe_id, 'photo' : self.photo}
+		return {'id': self.id, 'recipe_id' : self.recipe_id}
 
 	@classmethod
 

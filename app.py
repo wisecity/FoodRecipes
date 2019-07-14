@@ -9,7 +9,7 @@ from flask import make_response, send_file
 api = Api(app)
 jwt = JWTManager(app)
 
-from models import Recipe, User, Final_Photos
+from models import Recipe, User, Final_Photos, Ingredient_Photos, Step_Photos
 from routes import *
 
 #mainlink = "http://localhost:5000"
@@ -248,6 +248,47 @@ class QueryFinalPhotos(Resource):
 			_json.append(item)
 		return _json
 
+class IngredientPhotoFormation(Resource):
+	parser = reqparse.RequestParser()
+	parser.add_argument('tag', type=str, required=True, help='Tag of the photo')
+
+	def post(self, recipe_id):
+		args = IngredientPhotoFormation.parser.parse_args()
+		photo_tag = args['tag']
+		file = request.files['ingredient_photo']
+		file.save(os.path.join('static/recipe_photos/', '{}.jpeg'.format(photo_tag)))
+		newPhoto = Ingredient_Photos(recipe_id, os.path.join('static/recipe_photos/', '{}.jpeg'.format(photo_tag)))
+		newPhoto.create_to()
+
+class QueryIngredientPhotos(Resource):
+	def get(self, recipe_id):
+		_json= []
+		for photo in Ingredient_Photos.get_photos(recipe_id):
+			item = {}
+			item['photo_link'] = '{}/{}'.format(mainlink,photo.photo_link)
+			_json.append(item)
+		return _json
+
+class StepPhotoFormation(Resource):
+	parser = reqparse.RequestParser()
+	parser.add_argument('tag', type=str, required=True, help='Tag of the photo')
+
+	def post(self, recipe_id):
+		args = StepPhotoFormation.parser.parse_args()
+		photo_tag = args['tag']
+		file = request.files['step_photo']
+		file.save(os.path.join('static/recipe_photos/', '{}.jpeg'.format(photo_tag)))
+		newPhoto = Step_Photos(recipe_id, os.path.join('static/recipe_photos/', '{}.jpeg'.format(photo_tag)))
+		newPhoto.create_to()
+
+class QueryStepPhotos(Resource):
+	def get(self, recipe_id):
+		_json= []
+		for photo in Step_Photos.get_photos(recipe_id):
+			item = {}
+			item['photo_link'] = '{}/{}'.format(mainlink,photo.photo_link)
+			_json.append(item)
+		return _json
 
 @jwt.invalid_token_loader
 def invalid_token_callback(self):
@@ -283,6 +324,10 @@ api.add_resource(GetRecipe, '/api/getRecipe/<int:recipeId>')
 api.add_resource(PostRecipe, '/api/addRecipe')
 api.add_resource(FinalPhotoFormation, '/api/<int:recipe_id>/finalphoto')
 api.add_resource(QueryFinalPhotos, '/api/<int:recipe_id>/finalphoto')
+api.add_resource(IngredientPhotoFormation, '/api/<int:recipe_id>/ingredientphoto')
+api.add_resource(QueryIngredientPhotos, '/api/<int:recipe_id>/ingredientphoto')
+api.add_resource(StepPhotoFormation, '/api/<int:recipe_id>/stepphoto')
+api.add_resource(QueryStepPhotos, '/api/<int:recipe_id>/stepphoto')
 api.add_resource(All_Recipes, '/api/showAllRecipes')
 api.add_resource(CheckAuthority, '/api/checkAuthority/<int:recipeId>')
 api.add_resource(UserActivation, "/amiactive")

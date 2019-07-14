@@ -197,8 +197,12 @@ def recipedetails(recipe_id):
 		response = requests.get(url="{}/api/getRecipe/{}".format(mainlink, recipe_id), headers={"Authorization": "Bearer {}".format(session['access_token'])})
 		recipe = response.json()
 		response = requests.get(url="{}/api/{}/finalphoto".format(mainlink, recipe_id))
-		photos = response.json()
-		return render_template('recipedetails.html', recipe=recipe, photos = photos)
+		final_photos = response.json()
+		response = requests.get(url="{}/api/{}/ingredientphoto".format(mainlink, recipe_id))
+		ingredient_photos = response.json()
+		response = requests.get(url="{}/api/{}/stepphoto".format(mainlink, recipe_id))
+		step_photos = response.json()
+		return render_template('recipedetails.html', recipe=recipe, final_photos = final_photos, ingredient_photos = ingredient_photos, step_photos = step_photos)
 	else:
 		flash('Please login first.', 'danger')
 		return redirect(url_for('login'))
@@ -209,6 +213,22 @@ def uploadFinalPhoto():
     file = request.files['file']
     file.save(os.path.join('static', 'temp.jpeg'))
     respond = requests.post("{}/api/{}/finalphoto".format(mainlink, request.form['recipe_id']), params = tag, files={'final_photo' : open('static/temp.jpeg', 'rb')})
+    return redirect(url_for('recipedetails', recipe_id = request.form['recipe_id']))
+
+@app.route('/addingredientphoto', methods=['POST'])
+def uploadIngredientPhoto():
+    tag = {'tag' : request.form['photo_tag']}
+    file = request.files['file']
+    file.save(os.path.join('static', 'temp.jpeg'))
+    respond = requests.post("{}/api/{}/ingredientphoto".format(mainlink, request.form['recipe_id']), params = tag, files={'ingredient_photo' : open('static/temp.jpeg', 'rb')})
+    return redirect(url_for('recipedetails', recipe_id = request.form['recipe_id']))
+
+@app.route('/addstepphoto', methods=['POST'])
+def uploadStepPhoto():
+    tag = {'tag' : request.form['photo_tag']}
+    file = request.files['file']
+    file.save(os.path.join('static', 'temp.jpeg'))
+    respond = requests.post("{}/api/{}/stepphoto".format(mainlink, request.form['recipe_id']), params = tag, files={'step_photo' : open('static/temp.jpeg', 'rb')})
     return redirect(url_for('recipedetails', recipe_id = request.form['recipe_id']))
 
 @app.route("/webstats")
