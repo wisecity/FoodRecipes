@@ -205,10 +205,10 @@ def recipedetails(recipe_id):
 
 @app.route('/addfinalphoto', methods=['POST'])
 def uploadFinalPhoto():
-    json = { 'tag' : request.form['photo_tag']}
+    tag = {'tag' : request.form['photo_tag']}
     file = request.files['file']
     file.save(os.path.join('static', 'temp.jpeg'))
-    respond = requests.post("{}/api/{}/finalphoto".format(mainlink, request.form['recipe_id']), params = json, files={'final_photo' : open('static/temp.jpeg', 'rb')})
+    respond = requests.post("{}/api/{}/finalphoto".format(mainlink, request.form['recipe_id']), params = tag, files={'final_photo' : open('static/temp.jpeg', 'rb')})
     return redirect(url_for('recipedetails', recipe_id = request.form['recipe_id']))
 
 @app.route("/webstats")
