@@ -9,7 +9,7 @@ import os
 from werkzeug.datastructures import MultiDict
 
 
-# mainlink = "http://localhost:5000"
+#mainlink = "http://localhost:5000"
 mainlink = "https://foodrecipesbil495.herokuapp.com"
 
 # session login olunmadiginda init edilmemis oluyor.
@@ -127,9 +127,10 @@ def addrecipe():
 				'tags': form.tags.data
 			}
 			response = requests.post(url="{}/api/addRecipe".format(mainlink), params=_json, headers={"Authorization": "Bearer {}".format(session['access_token'])})
-			print(response)
-			print(response.status_code)
-			flash('Recipe Added.', 'success')
+			if response.status_code == 200:
+				flash('Recipe already exists', 'success')
+			else:
+				flash('Recipe Added.', 'success')
 			return redirect(url_for('allrecipes'))
 		else:
 			return render_template('addrecipe.html', form=form, title="Add Recipe")
@@ -194,10 +195,21 @@ def updaterecipe(recipe_id):
 def recipedetails(recipe_id):
 	if chk_session():
 		response = requests.get(url="{}/api/getRecipe/{}".format(mainlink, recipe_id), headers={"Authorization": "Bearer {}".format(session['access_token'])})
-		return render_template('recipedetails.html', recipe=response.json())
+		recipe = response.json()
+		response = requests.get(url="{}/api/{}/finalphoto".format(mainlink, recipe_id))
+		photos = response.json()
+		return render_template('recipedetails.html', recipe=recipe, photos = photos)
 	else:
 		flash('Please login first.', 'danger')
 		return redirect(url_for('login'))
+
+@app.route('/addfinalphoto', methods=['POST'])
+def uploadFinalPhoto():
+    json = { 'tag' : request.form['photo_tag']}
+    file = request.files['file']
+    file.save(os.path.join('static', 'temp.jpeg'))
+    respond = requests.post("{}/api/{}/finalphoto".format(mainlink, request.form['recipe_id']), params = json, files={'final_photo' : open('static/temp.jpeg', 'rb')})
+    return redirect(url_for('recipedetails', recipe_id = request.form['recipe_id']))
 
 @app.route("/webstats")
 def get():

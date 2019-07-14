@@ -1,16 +1,19 @@
 from run import app, db
 from datetime import datetime
-from flask import jsonify
+from flask import jsonify, request
 from flask_restful import Resource, reqparse, Api
 from flask_jwt_extended import create_access_token, create_refresh_token, jwt_refresh_token_required, get_jwt_identity, jwt_required, JWTManager
-import json
+import json, os
+from flask import make_response, send_file
 
 api = Api(app)
 jwt = JWTManager(app)
 
-from models import Recipe, User
+from models import Recipe, User, Final_Photos
 from routes import *
 
+#mainlink = "http://localhost:5000"
+mainlink = "https://foodrecipesbil495.herokuapp.com"
 
 class All_Recipes(Resource):
 	def get(self):
@@ -224,6 +227,27 @@ class UserRecipes(Resource):
 			print(_json)
 			return _json
 
+class FinalPhotoFormation(Resource):
+	parser = reqparse.RequestParser()
+	parser.add_argument('tag', type=str, required=True, help='Tag of the photo')
+
+	def post(self, recipe_id):
+		args = FinalPhotoFormation.parser.parse_args()
+		photo_tag = args['tag']
+		file = request.files['final_photo']
+		file.save(os.path.join('static/recipe_photos/', '{}.jpeg'.format(photo_tag)))
+		newPhoto = Final_Photos(recipe_id, os.path.join('static/recipe_photos/', '{}.jpeg'.format(photo_tag)))
+		newPhoto.create_to()
+
+class QueryFinalPhotos(Resource):
+	def get(self, recipe_id):
+		_json= []
+		for photo in Final_Photos.get_photos(recipe_id):
+			item = {}
+			item['photo_link'] = '{}/{}'.format(mainlink,photo.photo_link)
+			_json.append(item)
+		return _json
+
 
 @jwt.invalid_token_loader
 def invalid_token_callback(self):
@@ -257,14 +281,8 @@ api.add_resource(UserRecipes, '/api/getUserRecipes/<string:username>')
 api.add_resource(RecipeManipulation, '/api/recipeManipulation/<int:recipeId>')
 api.add_resource(GetRecipe, '/api/getRecipe/<int:recipeId>')
 api.add_resource(PostRecipe, '/api/addRecipe')
+api.add_resource(FinalPhotoFormation, '/api/<int:recipe_id>/finalphoto')
+api.add_resource(QueryFinalPhotos, '/api/<int:recipe_id>/finalphoto')
 api.add_resource(All_Recipes, '/api/showAllRecipes')
 api.add_resource(CheckAuthority, '/api/checkAuthority/<int:recipeId>')
-
-
-
-
-
-
-
 api.add_resource(UserActivation, "/amiactive")
-
