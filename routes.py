@@ -5,6 +5,7 @@ from forms import AddRecipeForm, UserRegistrationForm, UserLoginForm
 import requests
 from flask import jsonify
 from pprint import pprint
+from datetime import datetime
 import os
 from werkzeug.datastructures import MultiDict
 
@@ -117,11 +118,12 @@ def myrecipes():
 @app.route("/addrecipe", methods=['GET', 'POST'])
 def addrecipe():
 	if chk_session():
+		now = datetime.now()
 		form = AddRecipeForm()
 		if form.is_submitted():
 			_json = {
 				'name': form.name.data,
-				'post_time' : "2011-10-05T23:31:12",
+				'post_time' : now.strftime("%m/%d/%Y, %H:%M:%S"),
 				'contents': form.contents.data,
 				'details': form.details.data,
 				'tags': form.tags.data
@@ -161,6 +163,7 @@ def deleterecipe(recipe_id):
 @app.route("/updaterecipe/<int:recipe_id>", methods=['POST', 'GET'])
 def updaterecipe(recipe_id):
 	if chk_session():
+		now = datetime.now()
 		authority_response = requests.get(url="{}/api/checkAuthority/{}".format(mainlink, recipe_id), headers={"Authorization": "Bearer {}".format(session['access_token'])})
 		print(authority_response)
 		if authority_response.status_code == 200:
@@ -170,7 +173,7 @@ def updaterecipe(recipe_id):
 			if form.is_submitted():
 				_json = {
 					'name': form.name.data,
-					'post_time' : "2011-10-05T23:31:12",
+					'post_time' : now.strftime("%m/%d/%Y, %H:%M:%S"),
 					'contents': form.contents.data,
 					'details': form.details.data,
 					'tags': form.tags.data

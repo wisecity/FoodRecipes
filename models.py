@@ -172,14 +172,14 @@ class Recipe(db.Model):
 	__tablename__ = 'RECIPE'
 	id = db.Column(db.Integer, primary_key=True)
 	name = db.Column(db.String(100), nullable=False)
-	post_time = db.Column(db.DateTime, default=datetime.utcnow)
+	post_time = db.Column(db.String(100))
 	contents = db.Column(db.Text)
 	details = db.Column(db.Text)
 	views = db.Column(db.Integer, default=0)
-	score = db.Column(db.Float, default=0.0)
+	likes = db.Column(db.Integer, default=0)
 	user_id = db.Column(db.Integer, db.ForeignKey('USER.id'), nullable=False, default=0)
 
-	def __init__(self, name, contents, details, post_time=None, views=None, score=None, user_id=None):
+	def __init__(self, name, contents, details, post_time=None, views=None, likes=None, user_id=None):
 		self.name = name
 		self.contents = contents
 		self.details = details
@@ -188,14 +188,14 @@ class Recipe(db.Model):
 			self.post_time = post_time
 		if views != None:
 			self.views = views
-		if score != None:
-			self.score = score
+		if likes != None:
+			self.likes = likes
 		if user_id != None:
 			self.user_id = user_id
 
 
 	def json(self):
-		return {'name': self.name, "post_time" : str(self.post_time), "contents" : self.contents, "details" : self.details, "views" : self.views, "score" : self.score, "user_id" : self.user_id}
+		return {'name': self.name, "post_time" : str(self.post_time), "contents" : self.contents, "details" : self.details, "views" : self.views, "likes" : self.likes, "user_id" : self.user_id}
 
 	@classmethod
 	def find_by_id(cls, id):
@@ -222,7 +222,7 @@ class Recipe(db.Model):
 		_recipe.contents = self.contents
 		_recipe.details = self.details
 		_recipe.views = self.views
-		_recipe.score = self.score
+		_recipe.likes = self.likes
 		_recipe.user_id = self.user_id
 		print("----")
 		print(_recipe.id)
@@ -252,12 +252,16 @@ class Recipe(db.Model):
 		_recipe.contents = self.contents
 		_recipe.details = self.details
 		_recipe.views = self.views
-		_recipe.score = self.score
+		_recipe.likes = self.likes
 		_recipe.user_id = self.user_id
 		db.session.commit()
 
 	def increase_view(self):
 		self.views = self.views + 1
+		db.session.commit()
+
+	def increase_like(self):
+		self.likes = self.likes + 1
 		db.session.commit()
 
 db.create_all()

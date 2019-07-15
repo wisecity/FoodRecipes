@@ -26,7 +26,7 @@ class All_Recipes(Resource):
 			item['contents'] = recipe.contents
 			item['details'] = recipe.details
 			item['views'] = recipe.views
-			item['score'] = recipe.score
+			item['likes'] = recipe.likes
 			item['user_id'] = recipe.user_id
 			_json.append(item)
 		return _json
@@ -37,7 +37,7 @@ class All_Recipes(Resource):
 class PostRecipe(Resource):
 	parser = reqparse.RequestParser()
 	parser.add_argument('name', type=str, required=True, help='Name of the recipe')
-	parser.add_argument('post_time', type=lambda x: datetime.strptime(x,'%Y-%m-%dT%H:%M:%S'), required=True, help='Date of the recipe needs to be checked')
+	parser.add_argument('post_time', type=str, required=True, help='Date of the recipe needs to be checked')
 	parser.add_argument('contents', type=str, required=True, help='Content of the recipe')
 	parser.add_argument('details', type=str, required=True, help='Details of the recipe')
 	parser.add_argument('tags', type=str, required=False, help='Tags of the recipe')
@@ -56,7 +56,7 @@ class PostRecipe(Resource):
 		if Recipe.find_by_name(Recipe, args['name']):
 			return {'Message': 'Recipe with the name {} already exists.'.format(args['name'])}, 200
 			# return jsonify(message='Recipe with the name {} already exists'.format(args['name']), status_code=200)
-		item = Recipe(name=args['name'], post_time=args['post_time'], contents=args['contents'], details=args['details'], views=0, score=0, user_id=id)
+		item = Recipe(name=args['name'], post_time=args['post_time'], contents=args['contents'], details=args['details'], views=0, likes=0, user_id=id)
 		item.create_to()
 
 		if args['tags'] != "":
@@ -77,7 +77,7 @@ class GetRecipe(Resource):
 			_json['contents'] = item.contents
 			_json['details'] = item.details
 			_json['views'] = item.views
-			_json['score'] = item.score
+			_json['likes'] = item.likes
 			_json['user_id'] = item.user_id
 			return _json, 200
 		else:
@@ -221,7 +221,7 @@ class UserRecipes(Resource):
 				item['contents'] = recipe.contents
 				item['details'] = recipe.details
 				item['views'] = recipe.views
-				item['score'] = recipe.score
+				item['likes'] = recipe.likes
 				item['user_id'] = recipe.user_id
 				_json.append(item)
 			print(_json)

@@ -7,9 +7,9 @@
 		<p>Contents: {{recipe.contents}}</p>
 		<p>Details: {{recipe.details}}</p>
 		<p>Post Time: {{recipe.post_time}}</p>
-		<p>Score: {{recipe.score}}</p>
 		<p>Uid: {{recipe.user_id}}</p>
 		<p>Views: {{recipe.views}}</p>
+		<p>Likes: {{recipe.likes}}</p>
 		<a href="{{url_for('deleterecipe', recipe_id=recipe.id)}}">Delete Recipe</a>
 		<br>
 		<a href="{{url_for('updaterecipe', recipe_id=recipe.id)}}">Update Recipe</a>
