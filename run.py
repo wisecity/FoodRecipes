@@ -11,7 +11,6 @@ app.secret_key = "lSc-eEq-Qvd"
 db = SQLAlchemy()
 db.init_app(app)
 app.app_context().push()
-db.create_all()
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'

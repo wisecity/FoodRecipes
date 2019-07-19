@@ -1,7 +1,7 @@
 from run import app, db
 from flask import render_template, url_for, flash, redirect, request, session
 from models import Recipe, User
-from forms import AddRecipeForm, UserRegistrationForm, UserLoginForm
+from forms import AddRecipeForm, UserRegistrationForm, UserLoginForm, SearchForm
 import requests
 from flask import jsonify
 from pprint import pprint
@@ -10,8 +10,8 @@ import os
 from werkzeug.datastructures import MultiDict
 
 
-#mainlink = "http://localhost:5000"
-mainlink = "https://foodrecipesbil495.herokuapp.com"
+mainlink = "http://localhost:5000"
+#mainlink = "https://foodrecipesbil495.herokuapp.com"
 
 # session login olunmadiginda init edilmemis oluyor.
 # session login olunca 'access_token' elemani ekleniyor.
@@ -90,10 +90,16 @@ def logout():
 	return redirect(url_for('login'))
 
 
-@app.route("/allrecipes")
+@app.route("/allrecipes", methods=['GET', 'POST'])
 def allrecipes():
-	recipes = requests.get(url="{}/api/showAllRecipes".format(mainlink)).json()
-	return render_template('allrecipes.html', recipes=recipes, title="All Recipes")
+	form = SearchForm()
+	if form.is_submitted():
+		_json = {'search_type': form.search_type.data, 'searched_keyword': form.searched_keyword.data}
+		recipes = requests.get(url="{}/api/showAllRecipes".format(mainlink), params=_json).json()
+	else:
+		recipes = requests.get(url="{}/api/showAllRecipes".format(mainlink)).json()
+	# pprint(recipes)
+	return render_template('allrecipes.html', recipes=recipes, title="All Recipes", form=form)
 
 
 @app.route("/myrecipes")
@@ -168,8 +174,11 @@ def updaterecipe(recipe_id):
 		print(authority_response)
 		if authority_response.status_code == 200:
 			response = requests.get(url="{}/api/getRecipe/{}".format(mainlink, recipe_id), headers={"Authorization": "Bearer {}".format(session['access_token'])}).json()
-			autofill_dict = MultiDict({'name': response['name'], 'contents': response['contents'], 'details': response['details']})
-			form = AddRecipeForm()
+			autofill_dict = MultiDict({'name': response['name'], 'contents': response['contents'], 'details': response['details'], 'tags': response['tags']})
+			if request.method == 'GET':
+				form = AddRecipeForm(formdata=autofill_dict)
+			else:
+				form = AddRecipeForm()
 			if form.is_submitted():
 				_json = {
 					'name': form.name.data,
@@ -210,6 +219,7 @@ def recipedetails(recipe_id):
 		flash('Please login first.', 'danger')
 		return redirect(url_for('login'))
 
+
 @app.route('/addfinalphoto', methods=['POST'])
 def uploadFinalPhoto():
     tag = {'tag' : request.form['photo_tag']}
@@ -217,6 +227,7 @@ def uploadFinalPhoto():
     file.save(os.path.join('static', 'temp.jpeg'))
     respond = requests.post("{}/api/{}/finalphoto".format(mainlink, request.form['recipe_id']), params = tag, files={'final_photo' : open('static/temp.jpeg', 'rb')})
     return redirect(url_for('recipedetails', recipe_id = request.form['recipe_id']))
+
 
 @app.route('/addingredientphoto', methods=['POST'])
 def uploadIngredientPhoto():
@@ -226,6 +237,7 @@ def uploadIngredientPhoto():
     respond = requests.post("{}/api/{}/ingredientphoto".format(mainlink, request.form['recipe_id']), params = tag, files={'ingredient_photo' : open('static/temp.jpeg', 'rb')})
     return redirect(url_for('recipedetails', recipe_id = request.form['recipe_id']))
 
+
 @app.route('/addstepphoto', methods=['POST'])
 def uploadStepPhoto():
     tag = {'tag' : request.form['photo_tag']}
@@ -234,9 +246,11 @@ def uploadStepPhoto():
     respond = requests.post("{}/api/{}/stepphoto".format(mainlink, request.form['recipe_id']), params = tag, files={'step_photo' : open('static/temp.jpeg', 'rb')})
     return redirect(url_for('recipedetails', recipe_id = request.form['recipe_id']))
 
+
 @app.route("/webstats")
 def get():
 	return render_template('git_stats_web/activity.html')
+
 
 @app.route("/androidstats")
 def getAndroid():
