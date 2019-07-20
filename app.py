@@ -6,6 +6,8 @@ from flask_jwt_extended import create_access_token, create_refresh_token, jwt_re
 import json, os
 from flask import make_response, send_file
 from datetime import datetime
+import atexit
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from pprint import pprint
 
@@ -13,11 +15,36 @@ from pprint import pprint
 api = Api(app)
 jwt = JWTManager(app)
 
+
 from models import Recipe, User, Final_Photos, Ingredient_Photos, Step_Photos, Tags
 from routes import *
 
+
+# Delete recipe after 10 hrs.
+def delete_recipe_automatically():
+	with app.app_context():
+	    recipes = Recipe.get_all_recipes()
+	    for recipe in recipes:
+	    	if recipe.post_time == None:
+	    		Recipe.delete_by_id(recipe.id)
+	    	else:
+		    	recipe_date = datetime.strptime(recipe.post_time, "%m/%d/%Y, %H:%M:%S")
+		    	now = datetime.now()
+		    	timedelta = int((now-recipe_date).total_seconds())
+		    	if timedelta > 60 * 60 * 10: # delete recipes posted 10 hrs ago or more.
+		    		Recipe.delete_by_id(recipe.id)
+		    		print(recipe.post_time)
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=delete_recipe_automatically, trigger="interval", seconds=3)
+scheduler.start()
+
+# Shutdown register when exiting the app.
+atexit.register(lambda: scheduler.shutdown())
+
 #mainlink = "http://localhost:5000"
 mainlink = "https://foodrecipesbil495.herokuapp.com"
+
 
 class All_Recipes(Resource):
 	parser = reqparse.RequestParser()

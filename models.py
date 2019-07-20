@@ -254,6 +254,12 @@ class Recipe(db.Model):
 		Recipe.query.filter_by(id=id).delete()
 		db.session.commit()
 
+	@staticmethod
+	def get_all_recipes():
+		return Recipe.query.all()
+		#db.session.query(Recipe).all()
+
+
 
 	def add_recipe(self):
 		db.session.add(self)
