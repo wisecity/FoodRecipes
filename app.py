@@ -16,9 +16,6 @@ from pprint import pprint
 api = Api(app)
 jwt = JWTManager(app)
 
-db.drop_all()
-db.create_all()
-
 # from models import Recipe, User, Final_Photos, Ingredient_Photos, Step_Photos, Tags
 from models import *
 from routes import *
@@ -458,6 +455,8 @@ class IncreaseLike(Resource):
   			}
 
 		resp = requests.post('https://fcm.googleapis.com/fcm/send', data=json.dumps(_json), headers=headers)
+
+		return {'Message': 'User {} liked that.'.format(recipeId)}, 200
 
 class PushLikeNotification(Resource):
 	parser = reqparse.RequestParser()
