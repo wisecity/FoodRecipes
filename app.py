@@ -337,6 +337,7 @@ class IncreaseLike(Resource):
 	def post(self, recipe_id):
 		recipe = Recipe.find_by_id(recipe_id)
 		Recipe.increase_like(recipe)
+		return {'Message': 'User {} is authorized to do that.'.format(recipeId)}, 200
 
 @jwt.invalid_token_loader
 def invalid_token_callback(self):
