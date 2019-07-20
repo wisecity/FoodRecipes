@@ -27,10 +27,9 @@ class UserLoginForm(FlaskForm):
 	submit = SubmitField('Sign in')
 
 
-class UpdateAccountForm(FlaskForm):
-	username = StringField('Username',
-		validators=[DataRequired(), Length(min=2, max=20)])
+class UserUpdateForm(FlaskForm):
 	password = StringField('Password', validators=[DataRequired()])
+	recipe_delete_time = StringField('Recipe Delete Time(Second)', validators=[DataRequired()])
 	submit = SubmitField('Update')
 
 	'''

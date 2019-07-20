@@ -1,7 +1,8 @@
 from run import app, db
 from flask import render_template, url_for, flash, redirect, request, session
 from models import Recipe, User
-from forms import AddRecipeForm, UserRegistrationForm, UserLoginForm, SearchForm
+# from forms import AddRecipeForm, UserRegistrationForm, UserLoginForm, SearchForm, UserUpdateForm
+from forms import *
 import requests
 from flask import jsonify
 from pprint import pprint
@@ -10,8 +11,8 @@ import os
 from werkzeug.datastructures import MultiDict
 
 
-#mainlink = "http://localhost:5000"
-mainlink = "https://foodrecipesbil495.herokuapp.com"
+mainlink = "http://localhost:5000"
+#mainlink = "https://foodrecipesbil495.herokuapp.com"
 
 # session login olunmadiginda init edilmemis oluyor.
 # session login olunca 'access_token' elemani ekleniyor.
@@ -197,7 +198,7 @@ def updaterecipe(recipe_id):
 				return render_template('updaterecipe.html', form=form, title="Update Recipe")
 		else:
 			flash('You are not authorized to update this.', 'danger')
-			return redirect(url_for('myrecipes'))
+			return redirect(url_for('allrecipes'))
 	else:
 		flash('Please login first.', 'danger')
 		return redirect(url_for('login'))
@@ -259,3 +260,46 @@ def get():
 @app.route("/androidstats")
 def getAndroid():
 	return render_template('git_stats_android/activity.html')
+
+
+@app.route("/userdetails", methods=['POST', 'GET'])
+def userdetails():
+	if chk_session():
+		response = requests.post(url="{}/api/getUserId".format(mainlink), headers={"Authorization": "Bearer {}".format(session['access_token'])})
+		print(response)
+		print(response.status_code)
+
+		if response.status_code == 200:
+			user_id = response.json()['user_id']
+		else:
+			print("FATAL ERROR")
+			user_id = 0
+
+		now = datetime.now()
+		authority_response = requests.get(url="{}/api/checkUserUpdateAuthority/{}".format(mainlink, user_id), headers={"Authorization": "Bearer {}".format(session['access_token'])})
+		print(authority_response)
+		if authority_response.status_code == 200:
+			response = requests.get(url="{}/api/userManipulation/{}".format(mainlink, user_id), headers={"Authorization": "Bearer {}".format(session['access_token'])}).json()
+			autofill_dict = MultiDict({'password': response['password'], 'recipe_delete_time': response['recipe_delete_time']})
+			if request.method == 'GET':
+				form = UserUpdateForm(formdata=autofill_dict)
+			else:
+				form = UserUpdateForm()
+			if form.is_submitted():
+				_json = {
+					'password' : form.password.data,
+					'recipe_delete_time': int(form.recipe_delete_time.data)
+				}
+				response = requests.put(url="{}/api/userManipulation/{}".format(mainlink, user_id), params=_json, headers={"Authorization": "Bearer {}".format(session['access_token'])})
+				print(response.json())
+				print(response.status_code)
+				flash('User Updated.', 'success')
+				return redirect(url_for('userdetails', user_id=user_id))
+			else:
+				return render_template('userdetails.html', form=form, title="Update User")
+		else:
+			flash('You are not authorized to update this.', 'danger')
+			return redirect(url_for('allrecipes'))
+	else:
+		flash('Please login first.', 'danger')
+		return redirect(url_for('login'))

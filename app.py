@@ -16,27 +16,45 @@ api = Api(app)
 jwt = JWTManager(app)
 
 
-from models import Recipe, User, Final_Photos, Ingredient_Photos, Step_Photos, Tags
+# from models import Recipe, User, Final_Photos, Ingredient_Photos, Step_Photos, Tags
+from models import *
 from routes import *
 
 
-# Delete recipe after 10 hrs.
+# Delete recipe after a time.
 def delete_recipe_automatically():
 	with app.app_context():
-	    recipes = Recipe.get_all_recipes()
-	    for recipe in recipes:
-	    	if recipe.post_time == None:
-	    		Recipe.delete_by_id(recipe.id)
-	    	else:
-		    	recipe_date = datetime.strptime(recipe.post_time, "%m/%d/%Y, %H:%M:%S")
-		    	now = datetime.now()
-		    	timedelta = int((now-recipe_date).total_seconds())
-		    	if timedelta > 60 * 60 * 10: # delete recipes posted 10 hrs ago or more.
-		    		Recipe.delete_by_id(recipe.id)
-		    		print(recipe.post_time)
+		users = User.get_all_users()
+		for user in users:
+			recipes = Recipe.find_by_username(user.username)
+			for recipe in recipes:
+				if recipe.post_time == None:
+					Recipe.delete_by_id(recipe.id)
+				else:
+					recipe_date = datetime.strptime(recipe.post_time, "%m/%d/%Y, %H:%M:%S")
+					now = datetime.now()
+					timedelta = int((now-recipe_date).total_seconds())
+					if timedelta > user.recipe_delete_time: # delete recipes posted 10 hrs ago or more.
+						Recipe.delete_by_id(recipe.id)
+						print(recipe.post_time)
+	'''
+	with app.app_context():
+		recipes = Recipe.get_all_recipes()
+		for recipe in recipes:
+			if recipe.post_time == None:
+				Recipe.delete_by_id(recipe.id)
+			else:
+				recipe_date = datetime.strptime(recipe.post_time, "%m/%d/%Y, %H:%M:%S")
+				now = datetime.now()
+				timedelta = int((now-recipe_date).total_seconds())
+				if timedelta > 60 * 60 * 10: # delete recipes posted 10 hrs ago or more.
+					Recipe.delete_by_id(recipe.id)
+					print(recipe.post_time)
+	'''
+
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=delete_recipe_automatically, trigger="interval", seconds=3)
+scheduler.add_job(func=delete_recipe_automatically, trigger="interval", seconds=15)
 scheduler.start()
 
 # Shutdown register when exiting the app.
@@ -158,10 +176,20 @@ class CheckAuthority(Resource):
 			return {'Message': 'User {} is authorized to do that.'.format(recipeId)}, 200
 
 
+class CheckUserUpdateAuthority(Resource):
+	@jwt_required
+	def get(self, userId):
+		username = get_jwt_identity()
+		user = User.find_by_username(username)
+		if userId != user.id:
+			return {'Message': 'User {} is not authorized to do that'.format(username)}, 401
+		else:
+			return {'Message': 'User {} is authorized to do that.'.format(username)}, 200	
+
+
 class RecipeManipulation(Resource):
 	parser = reqparse.RequestParser()
 	parser.add_argument('name', type=str, required=True, help='Name of the recipe')
-	# parser.add_argument('post_time', type=lambda x: datetime.strptime(x,'%Y-%m-%dT%H:%M:%S'), required=True, help='Date of the recipe needs to be checked')
 	parser.add_argument('contents', type=str, required=True, help='Content of the recipe')
 	parser.add_argument('details', type=str, required=True, help='Details of the recipe')
 	parser.add_argument('tags', type=str, required=False, help='Tags of the recipe')
@@ -218,6 +246,39 @@ class UserList(Resource):
 		return {'Message': 'User not found.'}, 404
 
 
+class UserManipulation(Resource):
+	parser = reqparse.RequestParser()
+	parser.add_argument('password', type=str, required=True, help='Password of user')
+	parser.add_argument('recipe_delete_time', type=str, required=True, help='Time to delete recipe')
+
+	@jwt_required
+	def get(self, userId):
+		user = User.find_by_id(userId)
+		_json = {}
+		_json['password'] = user.password
+		_json['recipe_delete_time'] = user.recipe_delete_time
+		return _json, 200
+
+	@jwt_required
+	def put(self, userId):
+		user = User.find_by_id(userId)
+		if user:
+			args = UserManipulation.parser.parse_args()
+			print("RECIPE DELETE TIME: {}".format(args['recipe_delete_time']))
+			_user = User(user.username, args['password'], args['recipe_delete_time'])
+			User.update_user(_user, userId)
+			return {'Message': 'User info updated.'}, 200
+		else:
+			return {'Message': 'User not found.'}, 404
+
+	@jwt_required
+	def delete(self,userId):
+		try:
+			User.delete_by_id(userId)
+		except:
+			return {'Message': 'User could not deleted.'}, 400
+		return {'Message': 'User successfully deleted.'}, 200
+
 class UserRegister(Resource):
 	parser = reqparse.RequestParser()
 	parser.add_argument('username', type=str, required=True, help='Name of the user')
@@ -255,6 +316,13 @@ class GetUsername(Resource):
 		username = get_jwt_identity()
 		return {'username': username}, 200
 
+
+class GetUserId(Resource):
+	@jwt_required
+	def post(self):
+		username = get_jwt_identity()
+		user = User.find_by_username(username)
+		return {'user_id': user.id}, 200
 
 
 class UserLogin(Resource):
@@ -392,8 +460,10 @@ def fresh_token_loader_callback(self):
 
 api.add_resource(UserLogin, "/api/login")
 api.add_resource(GetUsername, "/api/getUsername")
+api.add_resource(GetUserId, "/api/getUserId")
 api.add_resource(UserRegister, "/api/register")
 api.add_resource(UserList, "/api/getUserInfo/<int:userId>")
+api.add_resource(UserManipulation, "/api/userManipulation/<int:userId>")
 api.add_resource(UserRecipes, '/api/getUserRecipes/<string:username>')
 api.add_resource(RecipeManipulation, '/api/recipeManipulation/<int:recipeId>')
 api.add_resource(GetRecipe, '/api/getRecipe/<int:recipeId>')
@@ -406,5 +476,6 @@ api.add_resource(StepPhotoFormation, '/api/<int:recipe_id>/stepphoto')
 api.add_resource(QueryStepPhotos, '/api/<int:recipe_id>/stepphoto')
 api.add_resource(All_Recipes, '/api/showAllRecipes')
 api.add_resource(CheckAuthority, '/api/checkAuthority/<int:recipeId>')
+api.add_resource(CheckUserUpdateAuthority, '/api/checkUserUpdateAuthority/<int:userId>')
 api.add_resource(UserActivation, "/amiactive")
 api.add_resource(IncreaseLike, '/api/<int:recipe_id>/like')

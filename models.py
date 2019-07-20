@@ -132,25 +132,31 @@ class User(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	username = db.Column(db.String(60), unique=True, nullable=False)
 	password = db.Column(db.String(60), nullable=False)
+	recipe_delete_time = db.Column(db.Integer, nullable=False)
 
 
-	def __init__(self, username, password):
+	def __init__(self, username, password, recipe_delete_time=None):
 		self.username = username
 		self.password = password
+		if recipe_delete_time == None:
+			self.recipe_delete_time = 60 * 60 * 24 # default is 1 day.
+		else:
+			self.recipe_delete_time = recipe_delete_time
 
 	def json(self):
 		return {'User name': self.username, "id" : self.id}
 
 	@staticmethod
-	def find_by_id(id):
-		return User.query.filter_by(id=id).first()
+	def find_by_id(user_id):
+		return User.query.filter_by(id=user_id).first()
 
 	@staticmethod
 	def find_by_username(username):
 		return User.query.filter_by(username=username).first()
 
-	def delete_by_id(id):
-		User.query.filter_by(id=id).delete()
+	# TODO: delete tags -> delete recipes -> delete user.
+	def delete_by_id(user_id):
+		User.query.filter_by(id=user_id).delete()
 		db.session.commit()
 
 	def delete_by_username(username):
@@ -162,10 +168,11 @@ class User(db.Model):
 		db.session.commit()
 		return self.id
 
-	def update_user(self):
-		_user = User.query.filter_by(id=self.id).first()
+	def update_user(self, user_id):
+		_user = User.query.filter_by(id=user_id).first()
 		_user.username = self.username
 		_user.password = self.password
+		_user.recipe_delete_time = self.recipe_delete_time
 		db.session.commit()
 		return self.id
 
@@ -173,6 +180,12 @@ class User(db.Model):
 		_user = User.query.filter_by(id=self.id).first()
 		recipeList = Recipe.query.filter_by(user_id = _user.id).all()
 		return recipeList
+
+
+	@staticmethod
+	def get_all_users():
+		return User.query.all()
+		#db.session.query(Recipe).all()
 
 
 class Recipe(db.Model):
@@ -216,7 +229,6 @@ class Recipe(db.Model):
 
 	@staticmethod
 	def find_by_username(username):
-		print(type(Recipe.query.all()))
 		user = User.query.filter_by(username=username).first()
 		if user == None:
 			return []

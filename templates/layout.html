@@ -38,6 +38,7 @@
             <div class="navbar-nav">
                 {% if session['access_token'] %}
                   <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
+                  <a class="nav-item nav-link" href="{{ url_for('userdetails')}}">Update User</a>
                 {% else %}
                   <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
                   <a class="nav-item nav-link" href="{{ url_for('register') }}">Register</a>
