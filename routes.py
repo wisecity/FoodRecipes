@@ -52,7 +52,6 @@ def register():
 			flash('{} adli hesap olusturuldu.'.format(form.username.data), 'success')
 			return redirect(url_for('login'))
 		else:
-			flash("Buraya girdi.", 'warning')
 			return render_template('register.html', title='Register', form=form)
 
 

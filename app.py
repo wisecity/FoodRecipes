@@ -7,6 +7,7 @@ import json, os
 from flask import make_response, send_file
 from datetime import datetime
 import atexit
+import requests
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from pprint import pprint
@@ -15,11 +16,14 @@ from pprint import pprint
 api = Api(app)
 jwt = JWTManager(app)
 
+db.drop_all()
+db.create_all()
 
 # from models import Recipe, User, Final_Photos, Ingredient_Photos, Step_Photos, Tags
 from models import *
 from routes import *
 
+firebase_auth_key = "AAAAZEY1WHc:APA91bHMYfwQHlq5c0MCznhKo9hzBHkbil8kC0NCysEkgBR5kg3um5Q57_bZioed46ohS0XfL9wWP99lZ6a0EdmktN9cQ7RYmPxxCYBeF-bMJgC3YLc3d7EWAjzX5v5K3VOWPnhxTFdp"
 
 # Delete recipe after a time.
 def delete_recipe_automatically():
@@ -432,7 +436,37 @@ class IncreaseLike(Resource):
 	def post(self, recipe_id):
 		recipe = Recipe.find_by_id(recipe_id)
 		Recipe.increase_like(recipe)
-		return {'Message': 'User {} is authorized to do that.'.format(recipeId)}, 200
+		user = User.find_by_id(recipe.user_id)
+
+		_json = {
+ 		"to" : user.device_id,
+ 		"collapse_key" : "type_a",
+ 		"notification" : {
+     	"body" : "Bir kullanici senin tarifini begendi!",
+     	"title": "Title of Your Notification"
+ 		},
+ 		"data" : {
+     	"body" : "Body of Your Notification in Data",
+     	"title": "Title of Your Notification in Title",
+     	"key_1" : "Value for key_1",
+     	"key_2" : "Value for key_2"
+ 	}
+}
+		headers = {
+    	'Authorization': 'key=' + firebase_auth_key,
+    	'Content-Type': 'application/json',
+  			}
+
+		resp = requests.post('https://fcm.googleapis.com/fcm/send', data=json.dumps(_json), headers=headers)
+
+class PushLikeNotification(Resource):
+	parser = reqparse.RequestParser()
+	parser.add_argument('device_id', type=str, required=True, help='Device id')
+	def post(self, username):
+		args = PushLikeNotification.parser.parse_args()
+		user = User.find_by_username(username)
+		user.device_id = args['device_id']
+		User.update_user(user, user.id)
 
 @jwt.invalid_token_loader
 def invalid_token_callback(self):
@@ -479,3 +513,4 @@ api.add_resource(CheckAuthority, '/api/checkAuthority/<int:recipeId>')
 api.add_resource(CheckUserUpdateAuthority, '/api/checkUserUpdateAuthority/<int:userId>')
 api.add_resource(UserActivation, "/amiactive")
 api.add_resource(IncreaseLike, '/api/<int:recipe_id>/like')
+api.add_resource(PushLikeNotification, '/api/<string:username>/deviceid')

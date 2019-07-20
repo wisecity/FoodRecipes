@@ -133,6 +133,7 @@ class User(db.Model):
 	username = db.Column(db.String(60), unique=True, nullable=False)
 	password = db.Column(db.String(60), nullable=False)
 	recipe_delete_time = db.Column(db.Integer, nullable=False)
+	device_id = db.Column(db.String(256))
 
 
 	def __init__(self, username, password, recipe_delete_time=None):
@@ -173,6 +174,7 @@ class User(db.Model):
 		_user.username = self.username
 		_user.password = self.password
 		_user.recipe_delete_time = self.recipe_delete_time
+		_user.device_id = self.device_id
 		db.session.commit()
 		return self.id
 
