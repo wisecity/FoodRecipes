@@ -10,5 +10,4 @@ pprint
 wtforms
 flask_appbuilder
 apscheduler
-atexit
 werkzeug
