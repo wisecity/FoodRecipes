@@ -184,7 +184,7 @@ class CheckUserUpdateAuthority(Resource):
 		if userId != user.id:
 			return {'Message': 'User {} is not authorized to do that'.format(username)}, 401
 		else:
-			return {'Message': 'User {} is authorized to do that.'.format(username)}, 200	
+			return {'Message': 'User {} is authorized to do that.'.format(username)}, 200
 
 
 class RecipeManipulation(Resource):
