@@ -23,7 +23,7 @@ class All_Recipes(Resource):
 	parser = reqparse.RequestParser()
 	parser.add_argument('search_type', type=str, required=False, help='Type to be searched')
 	parser.add_argument('searched_keyword', type=str, required=False, help='Searched keyword')
-	
+
 	def get(self):
 		args = All_Recipes.parser.parse_args()
 		print("Args-search_type: {}".format(args['search_type']))
@@ -83,14 +83,15 @@ class PostRecipe(Resource):
 		args = PostRecipe.parser.parse_args()
 		print("Tags: ", args['tags'])
 		item = Recipe(name=args['name'], contents=args['contents'], details=args['details'], views=0, user_id=id)
+		item.post_time = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 		recipe_id = item.add_recipe()
 
-		
+
 		if args['tags'] != "":
 			for tag_name in args['tags'].split("-"):
 				tag = Tags(recipe_id=recipe_id, name=tag_name)
 				tag.add_tag()
-		
+
 		return jsonify(item=item.json(), status_code=200)
 
 
@@ -332,6 +333,11 @@ class QueryStepPhotos(Resource):
 			_json.append(item)
 		return _json
 
+class IncreaseLike(Resource):
+	def post(self, recipe_id):
+		recipe = Recipe.find_by_id(recipe_id)
+		Recipe.increase_like(recipe)
+
 @jwt.invalid_token_loader
 def invalid_token_callback(self):
 	return {'description': "Signature verification failed!", "error": "invalid_token"}, 401
@@ -373,3 +379,4 @@ api.add_resource(QueryStepPhotos, '/api/<int:recipe_id>/stepphoto')
 api.add_resource(All_Recipes, '/api/showAllRecipes')
 api.add_resource(CheckAuthority, '/api/checkAuthority/<int:recipeId>')
 api.add_resource(UserActivation, "/amiactive")
+api.add_resource(IncreaseLike, '/api/<int:recipe_id>/like')

@@ -246,6 +246,10 @@ def uploadStepPhoto():
     respond = requests.post("{}/api/{}/stepphoto".format(mainlink, request.form['recipe_id']), params = tag, files={'step_photo' : open('static/temp.jpeg', 'rb')})
     return redirect(url_for('recipedetails', recipe_id = request.form['recipe_id']))
 
+@app.route("/like/<int:recipe_id>", methods=['POST', 'GET'])
+def like(recipe_id):
+	requests.post("{}/api/{}/like".format(mainlink, recipe_id))
+	return redirect(url_for('recipedetails', recipe_id = recipe_id))
 
 @app.route("/webstats")
 def get():
