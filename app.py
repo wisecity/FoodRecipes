@@ -456,7 +456,7 @@ class IncreaseLike(Resource):
 
 		resp = requests.post('https://fcm.googleapis.com/fcm/send', data=json.dumps(_json), headers=headers)
 
-		return {'Message': 'User {} liked that.'.format(recipeId)}, 200
+		return {'Message': 'User liked that.'}, 200
 
 class PushLikeNotification(Resource):
 	parser = reqparse.RequestParser()

@@ -311,4 +311,4 @@ class Recipe(db.Model):
 		self.likes = self.likes + 1
 		db.session.commit()
 
-db.create_all()
+
